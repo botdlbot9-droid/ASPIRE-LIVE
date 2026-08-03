@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>लाइव स्ट्रीम</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>📺 लाइव स्ट्रीम</h1>
+      <div class="live-badge">लाइव</div>
+    </div>
+
+    <div class="video-wrapper">
+      <!-- preload="auto" और playsinline जोड़ा गया -->
+      <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
+    </div>
+
+    <div class="status-bar">
+      <div class="viewer-count">
+        <span class="status-dot"></span>
+        <span class="status-text">लाइव चल रहा है</span>
+      </div>
+      <div class="viewer-count">
+        <span class="label">👁️ देख रहे हैं:</span>
+        <span class="number" id="viewerCount">0</span>
+      </div>
+    </div>
+
+    <!-- रीट्राई बटन और स्टेटस दिखाने के लिए -->
+    <div id="errorMsg" class="error-msg">❌ वीडियो लोड नहीं हुआ। पुनः प्रयास कर रहे हैं...</div>
+    <div id="statusMsg" class="status-msg" style="display:none; color:#f7971e; text-align:center; margin-top:10px; font-size:14px;">
+      🔄 कनेक्शन पुनः स्थापित किया जा रहा है...
+    </div>
+    <div class="footer">⚡ Render पर होस्ट किया गया</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
