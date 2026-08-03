@@ -1,8 +1,10 @@
 // ============================================================
-// 🔴 बस इस एक लाइन में अपना .m3u8 लिंक डालें
+// 🔴 अपना .m3u8 लिंक यहाँ डालें
 // ============================================================
 const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
-// ↑ इसको बदलकर अपना REAL .m3u8 लिंक डालें
+
+// CORS Proxy (ClassPlus के CORS को बायपास करने के लिए)
+const CORS_PROXY = "https://corsproxy.io/?url=";
 
 let hls = null;
 let reloadAttempts = 0;
@@ -30,7 +32,7 @@ function startViewerCounter() {
 startViewerCounter();
 
 // ============================================================
-// 🎬 वीडियो लोड करने का फंक्शन (बफरिंग + रिकवरी फिक्स के साथ)
+// 🎬 CORS Proxy के साथ वीडियो लोड करें
 // ============================================================
 function loadVideo(url) {
   if (!url) return;
@@ -44,34 +46,44 @@ function loadVideo(url) {
     hls = null;
   }
 
-  // Safari / iOS (Native HLS)
+  // CORS Proxy URL बनाएँ
+  const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+  console.log('📺 Proxy URL:', proxyUrl);
+
+  // Safari / iOS (Native HLS) - Proxy के साथ
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
+    video.src = proxyUrl;
     video.play().catch(function(e) {
       console.warn('Autoplay blocked:', e);
     });
     return;
   }
 
-  // बाकी ब्राउज़र (hls.js) - बेहतर कॉन्फ़िगरेशन के साथ
+  // बाकी ब्राउज़र (hls.js) - CORS Proxy के साथ
   if (Hls.isSupported()) {
     hls = new Hls({
       enableWorker: true,
       lowLatencyMode: true,
-      maxBufferLength: 60,              // बफर बढ़ाया
-      maxMaxBufferLength: 120,          // मैक्स बफर बढ़ाया
+      maxBufferLength: 60,
+      maxMaxBufferLength: 120,
       maxBufferSize: 60 * 1000 * 1000,
-      startFragPrefetch: true,          // पहले से लोड करना शुरू करें
+      startFragPrefetch: true,
       testBandwidth: true,
       abrEwmaDefaultEstimate: 500000,
       abrEwmaFastLive: 3.0,
       abrEwmaSlowLive: 9.0,
-      liveDurationInfinity: true,       // लाइव स्ट्रीम के लिए
+      liveDurationInfinity: true,
       liveMaxLatencyDurationCount: 3,
-      liveSyncDurationCount: 3
+      liveSyncDurationCount: 3,
+      // ✅ CORS Proxy के साथ काम करने के लिए
+      xhrSetup: function(xhr, url) {
+        // Proxy URL को ही use करें
+        console.log('📡 XHR Request:', url);
+      }
     });
 
-    hls.loadSource(url);
+    // Proxy URL के साथ लोड करें
+    hls.loadSource(proxyUrl);
     hls.attachMedia(video);
 
     hls.on(Hls.Events.MANIFEST_PARSED, function() {
@@ -80,12 +92,11 @@ function loadVideo(url) {
       });
     });
 
-    // ✅ लाइव स्ट्रीम रिलोड / रिकवर करने के लिए
+    // ✅ एरर हैंडलिंग
     hls.on(Hls.Events.ERROR, function(event, data) {
       if (data.fatal) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            // नेटवर्क एरर → रिकवर
             console.log('🔄 नेटवर्क एरर, रिकवर कर रहे हैं...');
             statusMsg.textContent = '🔄 कनेक्शन पुनः स्थापित किया जा रहा है...';
             statusMsg.classList.add('show');
@@ -93,7 +104,6 @@ function loadVideo(url) {
             break;
             
           case Hls.ErrorTypes.MEDIA_ERROR:
-            // मीडिया एरर → रिकवर
             console.log('🔄 मीडिया एरर, रिकवर कर रहे हैं...');
             statusMsg.textContent = '🔄 मीडिया पुनः लोड किया जा रहा है...';
             statusMsg.classList.add('show');
@@ -101,7 +111,6 @@ function loadVideo(url) {
             break;
             
           default:
-            // अन्य एरर → रिलोड
             console.log('🔄 एरर, पुनः लोड कर रहे हैं...');
             errorMsg.textContent = '❌ वीडियो लोड नहीं हुआ। पुनः प्रयास कर रहे हैं...';
             errorMsg.classList.add('show');
@@ -117,13 +126,10 @@ function loadVideo(url) {
             }
             break;
         }
-      } else {
-        // नॉन-फेटल एरर → रिकवर
-        console.log('⚠️ नॉन-फेटल एरर, इग्नोर कर रहे हैं...');
       }
     });
 
-    // ✅ खाली बफर (Buffer Stalled) होने पर रिकवर करें
+    // ✅ बफर स्टॉल होने पर रिकवर
     hls.on(Hls.Events.BUFFER_STALLED, function() {
       console.log('🔄 बफर स्टॉल हो गया, रिकवर कर रहे हैं...');
       statusMsg.textContent = '🔄 बफर रिफ्रेश किया जा रहा है...';
@@ -133,7 +139,7 @@ function loadVideo(url) {
       }
     });
 
-    // ✅ एक बार रिकवर हो जाने पर स्टेटस मैसेज हटाएँ
+    // ✅ रिकवर होने पर स्टेटस मैसेज हटाएँ
     hls.on(Hls.Events.LEVEL_LOADED, function() {
       statusMsg.classList.remove('show');
       errorMsg.classList.remove('show');
@@ -158,7 +164,7 @@ window.addEventListener('load', function() {
 });
 
 // ============================================================
-// 🔄 अगर वीडियो रुक जाए तो ऑटो-रिलोड (हर 5 सेकंड में चेक)
+// 🔄 अगर वीडियो रुक जाए तो ऑटो-रिलोड
 // ============================================================
 setInterval(function() {
   if (video && video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2) {
@@ -170,8 +176,5 @@ setInterval(function() {
   }
 }, 5000);
 
-// ============================================================
-// 📊 कंसोल में डिबगिंग के लिए
-// ============================================================
-console.log('✅ लाइव स्ट्रीम वेबसाइट तैयार है!');
+console.log('✅ लाइव स्ट्रीम वेबसाइट तैयार है! (CORS Proxy के साथ)');
 console.log('📺 लिंक:', DEFAULT_VIDEO_URL);
