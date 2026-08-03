@@ -84,7 +84,7 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
-        /* ----- Video Wrapper - SIRF PLAYER DIKHEGA, BAQI SAB CROP/HIDE ----- */
+        /* ----- Video ----- */
         .video-wrapper {
             position: relative;
             background: #000;
@@ -94,32 +94,11 @@
             width: 100%;
         }
 
-        /* ----- IFRAME - Player ka container ----- */
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #videoPlayer {
             width: 100%;
             height: 100%;
-            border: none;
+            display: block;
             background: #000;
-            /* ⭐ CROP: Sirf player dikhega, baaki sab hide */
-            clip-path: inset(0px 0px 0px 0px);
-        }
-
-        /* ⭐ EXTRA CROP - Agar player ke aas-paas kuch extra dikhe to */
-        /* isme inset values change karke crop kar sakte hain */
-        /* Example: top 50px, right 0px, bottom 50px, left 0px */
-        .video-wrapper iframe.crop-top {
-            clip-path: inset(60px 0px 0px 0px);
-        }
-
-        .video-wrapper iframe.crop-bottom {
-            clip-path: inset(0px 0px 60px 0px);
-        }
-
-        .video-wrapper iframe.crop-all {
-            clip-path: inset(50px 0px 50px 0px);
         }
 
         /* ----- Status Bar ----- */
@@ -184,10 +163,12 @@
             font-size: 15px;
             min-width: 200px;
             outline: none;
+            transition: 0.3s;
         }
 
         .input-section input:focus {
             border-color: #f7971e;
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
         }
 
         .input-section input::placeholder {
@@ -211,15 +192,7 @@
             box-shadow: 0 8px 30px rgba(247, 151, 30, 0.4);
         }
 
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #555;
-            font-size: 13px;
-            border-top: 1px solid #1a1a3e;
-            padding-top: 18px;
-        }
-
+        /* ----- Messages ----- */
         .message {
             font-size: 14px;
             margin-top: 8px;
@@ -244,6 +217,23 @@
             border-left: 3px solid #00ff88;
         }
 
+        .message.info {
+            color: #f7971e;
+            background: rgba(247, 151, 30, 0.1);
+            border-left: 3px solid #f7971e;
+        }
+
+        /* ----- Footer ----- */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #555;
+            font-size: 13px;
+            border-top: 1px solid #1a1a3e;
+            padding-top: 18px;
+        }
+
+        /* ----- Responsive ----- */
         @media (max-width: 600px) {
             .container { padding: 15px; }
             .header h1 { font-size: 18px; }
@@ -262,15 +252,9 @@
             <div class="live-badge">लाइव</div>
         </div>
 
-        <!-- ===== VIDEO PLAYER - SIRF PLAYER HI DIKHEGA ===== -->
+        <!-- ===== VIDEO PLAYER ===== -->
         <div class="video-wrapper">
-            <iframe 
-                id="liveFrame"
-                src="https://livepush.io/hlsplayer/index.html?src=https%3A%2F%2Fvs.classplusapp.com%2Fhls%2F6a7089aae86acfbc9dbb33f5%2Findex.m3u8"
-                allow="autoplay; encrypted-media; fullscreen"
-                allowfullscreen
-                class="crop-all"
-            ></iframe>
+            <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
         </div>
 
         <!-- ===== STATUS BAR ===== -->
@@ -291,24 +275,48 @@
             <button onclick="loadManualLink()">🎬 लोड करें</button>
         </div>
 
+        <!-- ===== MESSAGE AREA ===== -->
         <div id="message" class="message"></div>
-        <div class="footer">⚡ Livepush Player | सिर्फ Player दिख रहा है</div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer">
+            ⚡ hls.js प्लेयर | <span id="playerInfo">तैयार</span>
+        </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- hls.js LIBRARY (CDN) -->
+    <!-- ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT - Direct hls.js (No iframe, No Livepush) -->
+    <!-- ============================================================ -->
     <script>
         // ============================================================
-        // 🔴🔴🔴 DEFAULT LINK - यहाँ अपना .m3u8 लिंक डालें 🔴🔴🔴
+        // 🔴🔴🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴🔴🔴
         // ============================================================
         const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
+        // ============================================================
+        // VARIABLES
+        // ============================================================
+        let hls = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 999;
+        let isManualLoad = false;
+        let currentUrl = DEFAULT_VIDEO_URL;
+
+        const video = document.getElementById('videoPlayer');
         const viewerCountEl = document.getElementById('viewerCount');
         const statusText = document.getElementById('statusText');
         const messageEl = document.getElementById('message');
         const inputField = document.getElementById('videoUrlInput');
-        const liveFrame = document.getElementById('liveFrame');
+        const playerInfo = document.getElementById('playerInfo');
 
         // ============================================================
-        // 👁️ Viewer Counter (Simulated)
+        // 👁️ VIEWER COUNTER (Simulated)
         // ============================================================
         function startViewerCounter() {
             let count = Math.floor(Math.random() * 40) + 12;
@@ -324,7 +332,7 @@
         startViewerCounter();
 
         // ============================================================
-        // 📢 Message Helper
+        // 📢 MESSAGE HELPER
         // ============================================================
         function showMessage(msg, type) {
             messageEl.textContent = msg;
@@ -337,30 +345,208 @@
             }
         }
 
+        function hideMessage() {
+            messageEl.classList.remove('show');
+            clearTimeout(messageEl._hideTimer);
+        }
+
         // ============================================================
-        // 🔧 Manual Link Load - iframe mein link change karein
+        // 🎬 LOAD VIDEO - Direct hls.js (Livepush-style proxy)
         // ============================================================
-        function loadManualLink() {
-            const url = inputField.value.trim();
-            if (!url) {
-                showMessage("❌ कृपया पहले लिंक डालें!", "error");
+        function loadVideo(url) {
+            if (!url || url.trim() === "") {
+                showMessage("❌ कृपया एक वैध .m3u8 लिंक डालें!", "error");
                 return;
             }
 
-            // Livepush URL format में convert करें
-            const encodedUrl = encodeURIComponent(url);
-            const livepushUrl = `https://livepush.io/hlsplayer/index.html?src=${encodedUrl}`;
-            
-            // iframe में नया link डालें
-            liveFrame.src = livepushUrl;
-            
-            showMessage("✅ नया लिंक लोड हो रहा है...", "success");
-            statusText.textContent = "✅ लाइव चल रहा है";
-            
-            localStorage.setItem('savedLink', url);
+            currentUrl = url;
+            hideMessage();
+            statusText.textContent = "⏳ लोड हो रहा है...";
+            playerInfo.textContent = "लोड हो रहा...";
+
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+
+            // ============================================================
+            // SAFARI / iOS - Native HLS
+            // ============================================================
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play().catch(function(e) {
+                    console.warn('Autoplay blocked:', e);
+                    showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
+                });
+                statusText.textContent = "✅ लाइव चल रहा है (Native)";
+                playerInfo.textContent = "Safari Native Player";
+                showMessage("✅ वीडियो लोड हो गया!", "success");
+                return;
+            }
+
+            // ============================================================
+            // hls.js - Direct (Livepush-style proxy with custom headers)
+            // ============================================================
+            if (Hls.isSupported()) {
+                try {
+                    hls = new Hls({
+                        // Performance settings
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        maxBufferLength: 60,
+                        maxMaxBufferLength: 120,
+                        maxBufferSize: 60 * 1000 * 1000,
+                        startFragPrefetch: true,
+
+                        // Live stream settings
+                        liveDurationInfinity: true,
+                        liveMaxLatencyDurationCount: 10,
+                        liveSyncDurationCount: 10,
+
+                        // Timeout settings
+                        fragLoadingTimeOut: 60000,
+                        manifestLoadingTimeOut: 60000,
+                        levelLoadingTimeOut: 60000,
+
+                        // ABR settings
+                        abrEwmaDefaultEstimate: 500000,
+                        abrEwmaFastLive: 3.0,
+                        abrEwmaSlowLive: 9.0,
+                        testBandwidth: true,
+
+                        // ⭐ Extension जैसा behaviour - extra headers
+                        xhrSetup: function(xhr, url) {
+                            // Livepush की तरह headers
+                            xhr.setRequestHeader('Referer', 'https://livepush.io/');
+                            xhr.setRequestHeader('Origin', 'https://livepush.io/');
+                            xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+                            xhr.withCredentials = true;
+                            console.log('📡 XHR Headers set for:', url);
+                        }
+                    });
+
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+
+                    // ✅ MANIFEST PARSED
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        console.log('✅ MANIFEST PARSED');
+                        statusText.textContent = "✅ लाइव चल रहा है";
+                        playerInfo.textContent = "hls.js v" + Hls.version;
+                        showMessage("✅ वीडियो लोड हो गया!", "success");
+                        video.play().catch(function(e) {
+                            console.warn('Autoplay blocked:', e);
+                            showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
+                        });
+                    });
+
+                    // ✅ FRAGMENT LOADED
+                    hls.on(Hls.Events.FRAG_LOADED, function() {
+                        statusText.textContent = "✅ लाइव चल रहा है";
+                        hideMessage();
+                    });
+
+                    // ✅ BUFFER STALLED
+                    hls.on(Hls.Events.BUFFER_STALLED, function() {
+                        console.log('🔄 BUFFER STALLED, recovering...');
+                        statusText.textContent = "🔄 बफर हो रहा है...";
+                        showMessage("🔄 बफर रिफ्रेश किया जा रहा है...", "info");
+                        setTimeout(() => {
+                            if (hls) {
+                                hls.startLoad();
+                            }
+                        }, 1000);
+                    });
+
+                    // ✅ ERROR HANDLING
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.log('⚠️ ERROR:', data.type, data.details);
+
+                        if (data.fatal) {
+                            switch (data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.log('🔄 NETWORK ERROR, recovering...');
+                                    statusText.textContent = "🔄 कनेक्शन पुनः स्थापित...";
+                                    showMessage("🔄 कनेक्शन पुनः स्थापित किया जा रहा है...", "info");
+                                    setTimeout(() => {
+                                        if (hls) hls.startLoad();
+                                    }, 1000);
+                                    break;
+
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.log('🔄 MEDIA ERROR, recovering...');
+                                    statusText.textContent = "🔄 मीडिया पुनः लोड...";
+                                    showMessage("🔄 मीडिया पुनः लोड किया जा रहा है...", "info");
+                                    setTimeout(() => {
+                                        if (hls) hls.recoverMediaError();
+                                    }, 1000);
+                                    break;
+
+                                default:
+                                    if (retryCount < MAX_RETRIES) {
+                                        retryCount++;
+                                        console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
+                                        statusText.textContent = `🔄 पुनः प्रयास ${retryCount}...`;
+                                        showMessage(`🔄 पुनः प्रयास ${retryCount}...`, "info");
+                                        setTimeout(function() {
+                                            loadVideo(url);
+                                        }, 2000);
+                                    } else {
+                                        showMessage("❌ वीडियो नहीं चल रहा। नया लिंक डालें।", "error");
+                                        statusText.textContent = "❌ वीडियो नहीं चल रहा";
+                                        playerInfo.textContent = "Error";
+                                    }
+                                    break;
+                            }
+                        } else {
+                            if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
+                                console.log('🔄 Fragment error, retrying...');
+                                setTimeout(() => {
+                                    if (hls) hls.startLoad();
+                                }, 1000);
+                            }
+                        }
+                    });
+
+                    // ✅ LEVEL LOADED - Quality Info
+                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
+                        if (data && data.details) {
+                            const level = data.details;
+                            const height = level.height || '?';
+                            const width = level.width || '?';
+                            const bitrate = level.averageBitrate ? (level.averageBitrate / 1000).toFixed(0) : '?';
+                            playerInfo.textContent = `${width}x${height} @ ${bitrate}kbps`;
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('❌ hls.js Error:', error);
+                    showMessage("❌ प्लेयर शुरू नहीं हो पाया: " + error.message, "error");
+                    statusText.textContent = "❌ प्लेयर एरर";
+                }
+
+            } else {
+                showMessage("❌ आपका ब्राउज़र HLS सपोर्ट नहीं करता।", "error");
+                statusText.textContent = "❌ ब्राउज़र सपोर्ट नहीं करता";
+            }
         }
 
-        // Enter key support
+        // ============================================================
+        // 🔧 MANUAL LINK LOAD
+        // ============================================================
+        function loadManualLink() {
+            const url = inputField.value.trim();
+            if (url) {
+                isManualLoad = true;
+                retryCount = 0;
+                loadVideo(url);
+                localStorage.setItem('savedLink', url);
+                showMessage("✅ नया लिंक लोड किया जा रहा है...", "info");
+            } else {
+                showMessage("❌ कृपया पहले लिंक डालें!", "error");
+            }
+        }
+
         inputField.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadManualLink();
@@ -368,25 +554,68 @@
         });
 
         // ============================================================
-        // 🚀 Page Load
+        // 🚀 PAGE LOAD - DEFAULT LINK
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const savedLink = localStorage.getItem('savedLink');
-            
+            let linkToLoad = DEFAULT_VIDEO_URL;
+
             if (savedLink && savedLink !== "null" && savedLink !== "") {
+                linkToLoad = savedLink;
                 inputField.value = savedLink;
-                const encodedUrl = encodeURIComponent(savedLink);
-                liveFrame.src = `https://livepush.io/hlsplayer/index.html?src=${encodedUrl}`;
-                showMessage("✅ Saved link loaded!", "success");
             } else {
                 inputField.value = DEFAULT_VIDEO_URL;
-                showMessage("✅ Default link loaded!", "success");
+            }
+
+            if (linkToLoad && linkToLoad !== "https://example.com/stream.m3u8") {
+                loadVideo(linkToLoad);
+            } else {
+                showMessage("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।", "error");
+                statusText.textContent = "❌ कोई लिंक नहीं";
+            }
+
+            if (typeof Hls !== 'undefined' && Hls.version) {
+                console.log('📦 hls.js v' + Hls.version);
             }
         });
 
-        console.log('✅ Livepush Player Embedded Successfully!');
+        // ============================================================
+        // 🔄 AUTO-RETRY
+        // ============================================================
+        setInterval(function() {
+            if (!video) return;
+
+            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && !isManualLoad) {
+                console.log('🔄 Video stalled, reloading...');
+                statusText.textContent = "🔄 पुनः लोड...";
+                showMessage("🔄 वीडियो पुनः लोड किया जा रहा है...", "info");
+                const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
+                if (currentSrc) {
+                    loadVideo(currentSrc);
+                }
+            }
+
+            if (video.buffered.length > 0 && !video.paused && !isManualLoad) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                const currentTime = video.currentTime;
+                if (bufferedEnd - currentTime < 3 && video.readyState < 3) {
+                    console.log('🔄 Buffer low, reloading...');
+                    statusText.textContent = "🔄 बफर रिफ्रेश...";
+                    const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
+                    if (currentSrc) {
+                        loadVideo(currentSrc);
+                    }
+                }
+            }
+        }, 5000);
+
+        // ============================================================
+        // 📊 CONSOLE INFO
+        // ============================================================
+        console.log('✅ hls.js Player Ready!');
         console.log('📺 Default Link:', DEFAULT_VIDEO_URL);
-        console.log('✂️ Crop applied: sirf player dikhega');
+        console.log('🔗 GitHub: https://github.com/video-dev/hls.js');
+        console.log('💡 Ye player Livepush-style headers use kar raha hai.');
     </script>
 
 </body>
