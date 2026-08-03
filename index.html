@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HLS Player - लाइव स्ट्रीम</title>
+    <title>लाइव स्ट्रीम</title>
     <style>
-        /* ============================================================
-           CSS - पूरा स्टाइल
-           ============================================================ */
-
-        /* ----- Reset & Base ----- */
         * {
             margin: 0;
             padding: 0;
@@ -37,7 +32,6 @@
             border: 1px solid #2a2a4e;
         }
 
-        /* ----- Header ----- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -75,28 +69,15 @@
         }
 
         @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.3;
-                transform: scale(0.8);
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
         }
 
-        /* ----- Video ----- */
         .video-wrapper {
             position: relative;
             background: #000;
@@ -106,14 +87,13 @@
             width: 100%;
         }
 
-        #videoPlayer {
+        .video-wrapper iframe {
             width: 100%;
             height: 100%;
-            display: block;
+            border: none;
             background: #000;
         }
 
-        /* ----- Status Bar ----- */
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -157,7 +137,6 @@
             font-size: 15px;
         }
 
-        /* ----- Input Section ----- */
         .input-section {
             margin-top: 18px;
             display: flex;
@@ -175,12 +154,10 @@
             font-size: 15px;
             min-width: 200px;
             outline: none;
-            transition: 0.3s;
         }
 
         .input-section input:focus {
             border-color: #f7971e;
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
         }
 
         .input-section input::placeholder {
@@ -204,7 +181,15 @@
             box-shadow: 0 8px 30px rgba(247, 151, 30, 0.4);
         }
 
-        /* ----- Messages ----- */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #555;
+            font-size: 13px;
+            border-top: 1px solid #1a1a3e;
+            padding-top: 18px;
+        }
+
         .message {
             font-size: 14px;
             margin-top: 8px;
@@ -229,58 +214,35 @@
             border-left: 3px solid #00ff88;
         }
 
-        .message.info {
-            color: #f7971e;
-            background: rgba(247, 151, 30, 0.1);
-            border-left: 3px solid #f7971e;
-        }
-
-        /* ----- Footer ----- */
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #555;
-            font-size: 13px;
-            border-top: 1px solid #1a1a3e;
-            padding-top: 18px;
-        }
-
-        /* ----- Responsive ----- */
         @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            .header h1 {
-                font-size: 18px;
-            }
-            .status-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .input-section input {
-                min-width: 100%;
-            }
-            .input-section button {
-                width: 100%;
-            }
+            .container { padding: 15px; }
+            .header h1 { font-size: 18px; }
+            .status-bar { flex-direction: column; align-items: flex-start; }
+            .input-section input { min-width: 100%; }
+            .input-section button { width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- ===== HEADER ===== -->
+        <!-- Header -->
         <div class="header">
             <h1>📺 लाइव स्ट्रीम</h1>
             <div class="live-badge">लाइव</div>
         </div>
 
-        <!-- ===== VIDEO PLAYER ===== -->
+        <!-- Video Player - Livepush iframe -->
         <div class="video-wrapper">
-            <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
+            <iframe 
+                id="liveFrame"
+                src="https://livepush.io/hlsplayer/index.html?src=https%3A%2F%2Fvs.classplusapp.com%2Fhls%2F6a7089aae86acfbc9dbb33f5%2Findex.m3u8"
+                allow="autoplay; encrypted-media; fullscreen"
+                allowfullscreen
+            ></iframe>
         </div>
 
-        <!-- ===== STATUS BAR ===== -->
+        <!-- Status Bar -->
         <div class="status-bar">
             <div class="viewer-count">
                 <span class="status-dot"></span>
@@ -292,75 +254,30 @@
             </div>
         </div>
 
-        <!-- ===== INPUT SECTION ===== -->
+        <!-- Input Section - Link change karne ke liye -->
         <div class="input-section">
             <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें..." />
             <button onclick="loadManualLink()">🎬 लोड करें</button>
         </div>
 
-        <!-- ===== MESSAGE AREA ===== -->
         <div id="message" class="message"></div>
-
-        <!-- ===== FOOTER ===== -->
-        <div class="footer">
-            ⚡ hls.js प्लेयर | <span id="playerInfo">तैयार</span>
-        </div>
+        <div class="footer">⚡ Livepush.io Player Embed | कोई CORS Error नहीं</div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- hls.js LIBRARY (CDN) -->
-    <!-- ============================================================ -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
-    </script>
-
-    <!-- ============================================================ -->
-    <!-- JAVASCRIPT - Your own backend proxy approach -->
-    <!-- ============================================================ -->
     <script>
         // ============================================================
-        // 🔴🔴🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴🔴🔴
+        // 🔴🔴🔴 DEFAULT LINK - यहाँ अपना .m3u8 लिंक डालें 🔴🔴🔴
         // ============================================================
         const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
-        // ============================================================
-        // 🌐 PROXY - Your own backend proxy URL (Livepush-style)
-        // ============================================================
-        // ⭐⭐ यहाँ अपने BACKEND PROXY का URL डालें ⭐⭐
-        // उदाहरण: https://your-proxy-server.onrender.com/proxy?url=
-        const YOUR_PROXY_URL = "https://your-proxy-server.onrender.com/proxy?url=";
-
-        // अगर backend proxy नहीं है तो public proxy use करें (लेकिन यह unreliable है)
-        const FALLBACK_PROXY = "https://corsproxy.io/?url=";
-
-        // कौन सा proxy use करना है - 'backend' या 'fallback'
-        let proxyMode = 'backend'; // 'backend' या 'fallback'
-
-        function getProxyUrl(url) {
-            if (proxyMode === 'backend') {
-                return YOUR_PROXY_URL + encodeURIComponent(url);
-            } else {
-                return FALLBACK_PROXY + encodeURIComponent(url);
-            }
-        }
-
-        // ============================================================
-        // VARIABLES
-        // ============================================================
-        let hls = null;
-        let retryCount = 0;
-        const MAX_RETRIES = 999;
-        let isManualLoad = false;
-        let currentUrl = DEFAULT_VIDEO_URL;
-
-        const video = document.getElementById('videoPlayer');
         const viewerCountEl = document.getElementById('viewerCount');
         const statusText = document.getElementById('statusText');
         const messageEl = document.getElementById('message');
         const inputField = document.getElementById('videoUrlInput');
-        const playerInfo = document.getElementById('playerInfo');
+        const liveFrame = document.getElementById('liveFrame');
 
         // ============================================================
-        // 👁️ VIEWER COUNTER (Simulated)
+        // 👁️ Viewer Counter (Simulated)
         // ============================================================
         function startViewerCounter() {
             let count = Math.floor(Math.random() * 40) + 12;
@@ -376,7 +293,7 @@
         startViewerCounter();
 
         // ============================================================
-        // 📢 MESSAGE HELPER
+        // 📢 Message Helper
         // ============================================================
         function showMessage(msg, type) {
             messageEl.textContent = msg;
@@ -389,228 +306,31 @@
             }
         }
 
-        function hideMessage() {
-            messageEl.classList.remove('show');
-            clearTimeout(messageEl._hideTimer);
-        }
-
         // ============================================================
-        // 🎬 LOAD VIDEO - Livepush-style proxy approach
-        // ============================================================
-        function loadVideo(url) {
-            if (!url || url.trim() === "") {
-                showMessage("❌ कृपया एक वैध .m3u8 लिंक डालें!", "error");
-                return;
-            }
-
-            currentUrl = url;
-            hideMessage();
-            statusText.textContent = "⏳ लोड हो रहा है...";
-            playerInfo.textContent = "लोड हो रहा...";
-
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
-
-            // ⭐ Proxy URL बनाएँ - Livepush की तरह
-            const finalUrl = getProxyUrl(url);
-            console.log('🌐 Proxy URL:', finalUrl);
-            showMessage(`🔄 Proxy का उपयोग किया जा रहा है (${proxyMode})...`, 'info');
-
-            // ============================================================
-            // SAFARI / iOS - Native HLS
-            // ============================================================
-            if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = finalUrl;
-                video.play().catch(function(e) {
-                    console.warn('Autoplay blocked:', e);
-                    showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
-                });
-                statusText.textContent = "✅ लाइव चल रहा है (Native)";
-                playerInfo.textContent = "Safari Native Player";
-                showMessage("✅ वीडियो लोड हो गया!", "success");
-                return;
-            }
-
-            // ============================================================
-            // hls.js - Proxy के साथ (Livepush-style)
-            // ============================================================
-            if (Hls.isSupported()) {
-                try {
-                    hls = new Hls({
-                        // Performance settings
-                        enableWorker: true,
-                        lowLatencyMode: true,
-                        maxBufferLength: 60,
-                        maxMaxBufferLength: 120,
-                        maxBufferSize: 60 * 1000 * 1000,
-                        startFragPrefetch: true,
-
-                        // Live stream settings
-                        liveDurationInfinity: true,
-                        liveMaxLatencyDurationCount: 10,
-                        liveSyncDurationCount: 10,
-
-                        // Timeout settings
-                        fragLoadingTimeOut: 60000,
-                        manifestLoadingTimeOut: 60000,
-                        levelLoadingTimeOut: 60000,
-
-                        // ABR settings
-                        abrEwmaDefaultEstimate: 500000,
-                        abrEwmaFastLive: 3.0,
-                        abrEwmaSlowLive: 9.0,
-                        testBandwidth: true,
-
-                        // ⭐ Extension जैसा behaviour - extra headers
-                        xhrSetup: function(xhr, url) {
-                            // Livepush की तरह headers
-                            xhr.setRequestHeader('Referer', 'https://livepush.io/');
-                            xhr.setRequestHeader('Origin', 'https://livepush.io/');
-                            xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-                            xhr.withCredentials = true;
-                            console.log('📡 XHR Headers set for:', url);
-                        }
-                    });
-
-                    hls.loadSource(finalUrl);
-                    hls.attachMedia(video);
-
-                    // ✅ MANIFEST PARSED
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        console.log('✅ MANIFEST PARSED');
-                        statusText.textContent = "✅ लाइव चल रहा है";
-                        playerInfo.textContent = "hls.js v" + Hls.version + ' 🌐Proxy';
-                        showMessage("✅ वीडियो लोड हो गया!", "success");
-                        video.play().catch(function(e) {
-                            console.warn('Autoplay blocked:', e);
-                            showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
-                        });
-                    });
-
-                    // ✅ FRAGMENT LOADED
-                    hls.on(Hls.Events.FRAG_LOADED, function() {
-                        statusText.textContent = "✅ लाइव चल रहा है";
-                        hideMessage();
-                    });
-
-                    // ✅ BUFFER STALLED
-                    hls.on(Hls.Events.BUFFER_STALLED, function() {
-                        console.log('🔄 BUFFER STALLED, recovering...');
-                        statusText.textContent = "🔄 बफर हो रहा है...";
-                        showMessage("🔄 बफर रिफ्रेश किया जा रहा है...", "info");
-                        setTimeout(() => {
-                            if (hls) {
-                                hls.startLoad();
-                            }
-                        }, 1000);
-                    });
-
-                    // ✅ ERROR HANDLING - अगर backend proxy fail हो तो fallback पर switch
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        console.log('⚠️ ERROR:', data.type, data.details);
-
-                        // अगर backend proxy fail हो और fallback mode में नहीं हैं
-                        if (proxyMode === 'backend' &&
-                            (data.type === Hls.ErrorTypes.NETWORK_ERROR ||
-                                data.details === 'manifestLoadError' ||
-                                data.details === 'manifestIncompatibleCodecsError')) {
-                            console.log('🔄 Backend proxy fail, fallback पर switch...');
-                            proxyMode = 'fallback';
-                            showMessage("🔄 Backend proxy fail, fallback proxy use किया जा रहा है...", 'info');
-                            setTimeout(() => {
-                                loadVideo(currentUrl);
-                            }, 2000);
-                            return;
-                        }
-
-                        if (data.fatal) {
-                            switch (data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    console.log('🔄 NETWORK ERROR, recovering...');
-                                    statusText.textContent = "🔄 कनेक्शन पुनः स्थापित...";
-                                    showMessage("🔄 कनेक्शन पुनः स्थापित किया जा रहा है...", "info");
-                                    setTimeout(() => {
-                                        if (hls) hls.startLoad();
-                                    }, 1000);
-                                    break;
-
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.log('🔄 MEDIA ERROR, recovering...');
-                                    statusText.textContent = "🔄 मीडिया पुनः लोड...";
-                                    showMessage("🔄 मीडिया पुनः लोड किया जा रहा है...", "info");
-                                    setTimeout(() => {
-                                        if (hls) hls.recoverMediaError();
-                                    }, 1000);
-                                    break;
-
-                                default:
-                                    if (retryCount < MAX_RETRIES) {
-                                        retryCount++;
-                                        console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
-                                        statusText.textContent = `🔄 पुनः प्रयास ${retryCount}...`;
-                                        showMessage(`🔄 पुनः प्रयास ${retryCount}...`, "info");
-                                        setTimeout(function() {
-                                            loadVideo(currentUrl);
-                                        }, 2000);
-                                    } else {
-                                        showMessage("❌ वीडियो नहीं चल रहा। नया लिंक डालें।", "error");
-                                        statusText.textContent = "❌ वीडियो नहीं चल रहा";
-                                        playerInfo.textContent = "Error";
-                                    }
-                                    break;
-                            }
-                        } else {
-                            if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
-                                console.log('🔄 Fragment error, retrying...');
-                                setTimeout(() => {
-                                    if (hls) hls.startLoad();
-                                }, 1000);
-                            }
-                        }
-                    });
-
-                    // ✅ LEVEL LOADED - Quality Info
-                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
-                        if (data && data.details) {
-                            const level = data.details;
-                            const height = level.height || '?';
-                            const width = level.width || '?';
-                            const bitrate = level.averageBitrate ? (level.averageBitrate / 1000).toFixed(0) : '?';
-                            playerInfo.textContent = `${width}x${height} @ ${bitrate}kbps`;
-                        }
-                    });
-
-                } catch (error) {
-                    console.error('❌ hls.js Error:', error);
-                    showMessage("❌ प्लेयर शुरू नहीं हो पाया: " + error.message, "error");
-                    statusText.textContent = "❌ प्लेयर एरर";
-                }
-
-            } else {
-                showMessage("❌ आपका ब्राउज़र HLS सपोर्ट नहीं करता।", "error");
-                statusText.textContent = "❌ ब्राउज़र सपोर्ट नहीं करता";
-            }
-        }
-
-        // ============================================================
-        // 🔧 MANUAL LINK LOAD
+        // 🔧 Manual Link Load - iframe mein link change karein
         // ============================================================
         function loadManualLink() {
             const url = inputField.value.trim();
-            if (url) {
-                isManualLoad = true;
-                retryCount = 0;
-                proxyMode = 'backend'; // Reset to backend proxy
-                loadVideo(url);
-                localStorage.setItem('savedLink', url);
-                showMessage("✅ नया लिंक लोड किया जा रहा है...", "info");
-            } else {
+            if (!url) {
                 showMessage("❌ कृपया पहले लिंक डालें!", "error");
+                return;
             }
+
+            // Livepush URL format में convert करें
+            const encodedUrl = encodeURIComponent(url);
+            const livepushUrl = `https://livepush.io/hlsplayer/index.html?src=${encodedUrl}`;
+            
+            // iframe में नया link डालें
+            liveFrame.src = livepushUrl;
+            
+            showMessage("✅ नया लिंक लोड हो रहा है...", "success");
+            statusText.textContent = "✅ लाइव चल रहा है";
+            
+            // localStorage में save करें
+            localStorage.setItem('savedLink', url);
         }
 
+        // Enter key support
         inputField.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadManualLink();
@@ -618,68 +338,28 @@
         });
 
         // ============================================================
-        // 🚀 PAGE LOAD - DEFAULT LINK
+        // 🚀 Page Load
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const savedLink = localStorage.getItem('savedLink');
-            let linkToLoad = DEFAULT_VIDEO_URL;
-
+            
             if (savedLink && savedLink !== "null" && savedLink !== "") {
-                linkToLoad = savedLink;
                 inputField.value = savedLink;
+                // Agar saved link hai toh use load karein
+                const encodedUrl = encodeURIComponent(savedLink);
+                liveFrame.src = `https://livepush.io/hlsplayer/index.html?src=${encodedUrl}`;
+                showMessage("✅ Saved link loaded!", "success");
             } else {
                 inputField.value = DEFAULT_VIDEO_URL;
-            }
-
-            if (linkToLoad && linkToLoad !== "https://example.com/stream.m3u8") {
-                loadVideo(linkToLoad);
-            } else {
-                showMessage("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।", "error");
-                statusText.textContent = "❌ कोई लिंक नहीं";
-            }
-
-            if (typeof Hls !== 'undefined' && Hls.version) {
-                console.log('📦 hls.js v' + Hls.version);
+                // Default link already in iframe src
+                showMessage("✅ Default link loaded!", "success");
             }
         });
 
-        // ============================================================
-        // 🔄 AUTO-RETRY
-        // ============================================================
-        setInterval(function() {
-            if (!video) return;
-
-            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && !isManualLoad) {
-                console.log('🔄 Video stalled, reloading...');
-                statusText.textContent = "🔄 पुनः लोड...";
-                showMessage("🔄 वीडियो पुनः लोड किया जा रहा है...", "info");
-                const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
-                if (currentSrc) {
-                    loadVideo(currentSrc);
-                }
-            }
-
-            if (video.buffered.length > 0 && !video.paused && !isManualLoad) {
-                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-                const currentTime = video.currentTime;
-                if (bufferedEnd - currentTime < 3 && video.readyState < 3) {
-                    console.log('🔄 Buffer low, reloading...');
-                    statusText.textContent = "🔄 बफर रिफ्रेश...";
-                    const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
-                    if (currentSrc) {
-                        loadVideo(currentSrc);
-                    }
-                }
-            }
-        }, 5000);
-
-        // ============================================================
-        // 📊 CONSOLE INFO
-        // ============================================================
-        console.log('✅ hls.js Player Ready! (Livepush-style Proxy)');
+        console.log('✅ Livepush Player Embedded Successfully!');
         console.log('📺 Default Link:', DEFAULT_VIDEO_URL);
-        console.log('🌐 Backend Proxy:', YOUR_PROXY_URL);
-        console.log('🌐 Fallback Proxy:', FALLBACK_PROXY);
+        console.log('💡 Link expire ho toh naya daalein aur "लोड करें" dabayein.');
     </script>
+
 </body>
 </html>
