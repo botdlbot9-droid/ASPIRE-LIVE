@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hls.js प्लेयर - लाइव स्ट्रीम</title>
+    <title>hls.js Player - लाइव स्ट्रीम</title>
     <style>
+        /* ====================================================== */
+        /* CSS - पूरा स्टाइल */
+        /* ====================================================== */
+
         /* ----- Reset & Base ----- */
         * {
             margin: 0;
@@ -167,6 +171,10 @@
             box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
         }
 
+        .input-section input::placeholder {
+            color: #666;
+        }
+
         .input-section button {
             padding: 12px 28px;
             border-radius: 12px;
@@ -227,40 +235,29 @@
 
         /* ----- Responsive ----- */
         @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            .header h1 {
-                font-size: 18px;
-            }
-            .status-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .input-section input {
-                min-width: 100%;
-            }
-            .input-section button {
-                width: 100%;
-            }
+            .container { padding: 15px; }
+            .header h1 { font-size: 18px; }
+            .status-bar { flex-direction: column; align-items: flex-start; }
+            .input-section input { min-width: 100%; }
+            .input-section button { width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
+        <!-- ===== HEADER ===== -->
         <div class="header">
             <h1>📺 लाइव स्ट्रीम</h1>
             <div class="live-badge">लाइव</div>
         </div>
 
-        <!-- Video Player -->
+        <!-- ===== VIDEO PLAYER ===== -->
         <div class="video-wrapper">
             <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
         </div>
 
-        <!-- Status Bar -->
+        <!-- ===== STATUS BAR ===== -->
         <div class="status-bar">
             <div class="viewer-count">
                 <span class="status-dot"></span>
@@ -272,28 +269,28 @@
             </div>
         </div>
 
-        <!-- Input Section -->
+        <!-- ===== INPUT SECTION ===== -->
         <div class="input-section">
             <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें..." />
             <button onclick="loadManualLink()">🎬 लोड करें</button>
         </div>
 
-        <!-- Message Area -->
+        <!-- ===== MESSAGE AREA ===== -->
         <div id="message" class="message"></div>
 
-        <!-- Footer -->
+        <!-- ===== FOOTER ===== -->
         <div class="footer">
             ⚡ hls.js प्लेयर | <span id="playerInfo">तैयार</span>
         </div>
     </div>
 
     <!-- ============================================================== -->
-    <!-- hls.js LIBRARY (CDN) - यही मुख्य प्लेयर इंजन है -->
+    <!-- hls.js LIBRARY (CDN) - GitHub repo से लिया गया -->
     <!-- ============================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <!-- ============================================================== -->
-    <!-- MAIN SCRIPT - प्लेयर को कंट्रोल करता है -->
+    <!-- JAVASCRIPT - पूरा कंट्रोल -->
     <!-- ============================================================== -->
     <script>
         // ============================================================
@@ -353,7 +350,7 @@
         }
 
         // ============================================================
-        // 🎬 hls.js प्लेयर - GitHub रिपॉजिटरी के अनुसार
+        // 🎬 LOAD VIDEO - hls.js (जैसा GitHub repo में है)
         // ============================================================
         function loadVideo(url) {
             if (!url || url.trim() === "") {
@@ -373,7 +370,7 @@
             }
 
             // ============================================================
-            // 1. SAFARI / iOS - Native HLS Support
+            // SAFARI / iOS - Native HLS
             // ============================================================
             if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
@@ -388,34 +385,40 @@
             }
 
             // ============================================================
-            // 2. hls.js - जैसा कि GitHub रिपॉजिटरी में दिखाया गया है
+            // hls.js - GitHub repo वाला तरीका
             // ============================================================
             if (Hls.isSupported()) {
                 try {
-                    // नया hls.js इंस्टेंस बनाएँ
                     hls = new Hls({
-                        // बेहतर प्रदर्शन के लिए सेटिंग्स
+                        // Performance settings
                         enableWorker: true,
                         lowLatencyMode: true,
                         maxBufferLength: 60,
                         maxMaxBufferLength: 120,
+                        maxBufferSize: 60 * 1000 * 1000,
                         startFragPrefetch: true,
+
+                        // Live stream settings
                         liveDurationInfinity: true,
                         liveMaxLatencyDurationCount: 10,
                         liveSyncDurationCount: 10,
+
+                        // Timeout settings
                         fragLoadingTimeOut: 60000,
                         manifestLoadingTimeOut: 60000,
                         levelLoadingTimeOut: 60000,
+
+                        // ABR settings
                         abrEwmaDefaultEstimate: 500000,
                         abrEwmaFastLive: 3.0,
                         abrEwmaSlowLive: 9.0,
+                        testBandwidth: true,
                     });
 
-                    // लिंक लोड करें और वीडियो एलिमेंट को अटैच करें
                     hls.loadSource(url);
                     hls.attachMedia(video);
 
-                    // ✅ MANIFEST PARSED - जब प्लेलिस्ट लोड हो जाए
+                    // ✅ MANIFEST PARSED
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         console.log('✅ MANIFEST PARSED');
                         statusText.textContent = "✅ लाइव चल रहा है";
@@ -427,13 +430,13 @@
                         });
                     });
 
-                    // ✅ FRAGMENT LOADED - जब कोई सेगमेंट लोड हो
+                    // ✅ FRAGMENT LOADED
                     hls.on(Hls.Events.FRAG_LOADED, function() {
                         statusText.textContent = "✅ लाइव चल रहा है";
                         hideMessage();
                     });
 
-                    // ✅ BUFFER STALLED - जब बफर रुक जाए
+                    // ✅ BUFFER STALLED
                     hls.on(Hls.Events.BUFFER_STALLED, function() {
                         console.log('🔄 BUFFER STALLED, recovering...');
                         statusText.textContent = "🔄 बफर हो रहा है...";
@@ -445,7 +448,7 @@
                         }, 1000);
                     });
 
-                    // ✅ ERROR HANDLING - GitHub रिपॉजिटरी की तरह
+                    // ✅ ERROR HANDLING
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         console.log('⚠️ ERROR:', data.type, data.details);
 
@@ -486,7 +489,7 @@
                                     break;
                             }
                         } else {
-                            // नॉन-फेटल एरर - इग्नोर करें
+                            // Non-fatal error - ignore
                             if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
                                 console.log('🔄 Fragment error, retrying...');
                                 setTimeout(() => {
@@ -496,7 +499,7 @@
                         }
                     });
 
-                    // ✅ LEVEL LOADED - जब क्वालिटी बदले
+                    // ✅ LEVEL LOADED - Quality Info
                     hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
                         if (data && data.details) {
                             const level = data.details;
