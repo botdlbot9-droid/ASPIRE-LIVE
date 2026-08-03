@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Shaka Player Example - Live Stream</title>
+    <title>Shaka Player - Live Stream</title>
     <style>
-        /* बस एक बेसिक स्टाइल */
         body {
             background: #0a0a0a;
             display: flex;
@@ -12,44 +11,85 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         #video-container {
             width: 90%;
             max-width: 1000px;
-            background: #000;
+            background: #1a1a2e;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             border-radius: 12px;
             overflow: hidden;
+            border: 1px solid #2a2a4e;
         }
-        video {
+        #videoElement {
             width: 100%;
             height: auto;
             display: block;
             background: #000;
+            aspect-ratio: 16/9;
         }
         #status {
             color: #00ff88;
-            padding: 10px 15px;
-            background: #111;
+            padding: 12px 18px;
+            background: #12122a;
             text-align: center;
             font-size: 14px;
-            border-top: 1px solid #333;
+            border-top: 1px solid #2a2a4e;
+            font-weight: 500;
+        }
+        #status.error {
+            color: #ff6b6b;
+        }
+        #status.loading {
+            color: #f7971e;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            background: #1a1a2e;
+            border-bottom: 1px solid #2a2a4e;
+        }
+        .header h2 {
+            color: #fff;
+            font-size: 18px;
+            margin: 0;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .live-badge {
+            background: #ff0000;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
 
 <div id="video-container">
-    <!-- यहाँ वीडियो दिखेगा -->
+    <div class="header">
+        <h2>📺 लाइव स्ट्रीम</h2>
+        <span class="live-badge">लाइव</span>
+    </div>
     <video id="videoElement" controls autoplay playsinline></video>
     <div id="status">⏳ वीडियो लोड हो रहा है...</div>
 </div>
 
-<!-- 1. Shaka Player Library (CDN) -->
+<!-- Shaka Player CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.10/shaka-player.compiled.js"></script>
 
-<!-- 2. mux.js Library (HLS के लिए ज़रूरी) -->
+<!-- mux.js (HLS के लिए) -->
 <script src="https://cdn.jsdelivr.net/npm/mux.js@latest/dist/mux.min.js"></script>
 
 <script>
@@ -57,96 +97,144 @@
         const videoElement = document.getElementById('videoElement');
         const statusDiv = document.getElementById('status');
 
-        // 🔴 🔴 🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴 🔴 🔴
+        // 🔴🔴🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴🔴🔴
         const MANIFEST_URL = 'https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8';
 
-        // Shaka Player इनिशियलाइज़ करें
-        const player = new shaka.Player(videoElement);
+        // ✅ CORS Proxy (ClassPlus के CORS को बायपास करने के लिए)
+        const CORS_PROXY = 'https://corsproxy.io/?url=';
 
-        // --- VLC जैसी स्मूद स्ट्रीमिंग के लिए ख़ास कॉन्फ़िगरेशन ---
-        // ये सेटिंग्स बार-बार रुकने (buffering) की समस्या को कम करती हैं [citation:2][citation:5][citation:9]
-        player.configure({
-            streaming: {
-                // बफर Goal बढ़ाएँ (जितना Data पहले से लोड होगा, उतना कम रुकेगा)
-                bufferingGoal: 30,          // 30 सेकंड का बफर लोड करेगा
-                rebufferingGoal: 10,        // अगर बफर 10 सेकंड से कम हो तो दोबारा लोड करे
-                // HLS के लिए ख़ास सेटिंग्स
-                hls: {
-                    allowMp2t: true,        // MPEG-TS format को अनुमति दें
-                    useNativeHls: false     // JavaScript पार्सर का इस्तेमाल करें (ज्यादा कंट्रोल के लिए)
-                },
-                // Retry Parameters: अगर कोई सेगमेंट लोड न हो तो 5 बार दोबारा कोशिश करे [citation:2]
-                retryParameters: {
-                    maxAttempts: 5,
-                    timeout: 10000,         // 10 सेकंड का टाइमआउट
-                    baseDelay: 1000         // हर कोशिश के बीच 1 सेकंड का गैप
-                },
-                // लाइव स्ट्रीम के लिए सही सेटिंग्स [citation:5]
-                lowLatencyMode: true,
-                infiniteLiveStreamDuration: true
-            },
-            manifest: {
-                // HLS मैनिफेस्ट में थोड़ी देर और सेगमेंट रखें
-                hls: {
-                    liveSegmentsDelay: 1.5
-                },
-                // अगर कोई टेक्स्ट (जैसे subtitles) लोड न हो तो उसे इग्नोर करें [citation:2]
-                ignoreManifestTextInfoFailures: true,
-                ignoreTextStreamFailures: true
-            },
-            // ABR (Adaptive Bitrate) सेटिंग्स [citation:5]
-            abr: {
-                enabled: true,
-                switchInterval: 5,          // 5 सेकंड में एक बार बिटरेट चेक करे
-                bandwidthUpgradeTarget: 0.7,
-                bandwidthDowngradeTarget: 0.8
-            }
-        });
-
-        // --- Error Handling: अगर कोई एरर आए तो रिकवर करें ---
-        player.addEventListener('error', function(event) {
-            const error = event.detail;
-            console.error('Shaka Player Error:', error);
-            statusDiv.innerHTML = '❌ वीडियो लोड करने में समस्या: ' + error.message;
-            // 🔄 अगर नेटवर्क एरर है तो दोबारा लोड करने की कोशिश करें [citation:2]
-            if (error.code === shaka.util.Error.Code.BAD_HTTP_STATUS) {
-                statusDiv.innerHTML = '🔄 लिंक एक्सपायर हो सकता है, दोबारा कोशिश कर रहे हैं...';
-                player.load(MANIFEST_URL).catch(onLoadError);
-            }
-        });
-
-        // --- बफरिंग स्टेट को मॉनिटर करें ---
-        player.addEventListener('buffering', function(event) {
-            if (event.buffering) {
-                statusDiv.innerHTML = '⏳ बफर हो रहा है, कृपया रुकें...';
-                // अगर बहुत देर तक बफर कर रहा है तो रिट्राई करें [citation:2]
-                setTimeout(function() {
-                    if (player.isBuffering()) {
-                        statusDiv.innerHTML = '🔄 स्ट्रीम रिट्राई की जा रही है...';
-                        player.retryStreaming();
-                    }
-                }, 5000);
-            } else {
-                statusDiv.innerHTML = '✅ लाइव चल रहा है';
-            }
-        });
-
-        // --- वीडियो लोड करें ---
-        function onLoadError(error) {
-            console.error('Load Error:', error);
-            statusDiv.innerHTML = '❌ वीडियो लोड नहीं हो पाया। कृपया पेज रिफ्रेश करें या नया लिंक डालें।';
+        function updateStatus(msg, type) {
+            statusDiv.textContent = msg;
+            statusDiv.className = type || '';
         }
 
-        player.load(MANIFEST_URL, null, 'application/x-mpegURL')
-            .then(() => {
-                statusDiv.innerHTML = '✅ लाइव चल रहा है';
-                console.log('✅ Shaka Player Loaded Successfully!');
-            })
-            .catch(onLoadError);
+        // ============================================================
+        // 🔧 Shaka Player को CORS Proxy के साथ कॉन्फ़िगर करें
+        // ============================================================
+        function initShakaPlayer() {
+            const player = new shaka.Player(videoElement);
 
-        // --- Browser's Native Controls को Enable करें (जैसे Fullscreen, Volume) ---
-        videoElement.controls = true;
+            // ✅ CORS Proxy को Shaka के Network Engine में add करें
+            const originalRequest = shaka.net.HttpFetchPlugin.prototype.request;
+            shaka.net.HttpFetchPlugin.prototype.request = function(uri, request) {
+                // अगर URL .m3u8 या .ts से खत्म होता है तो Proxy से जोड़ें
+                if (uri.includes('.m3u8') || uri.includes('.ts')) {
+                    const proxyUrl = CORS_PROXY + encodeURIComponent(uri);
+                    console.log('🔄 Proxy URL:', proxyUrl);
+                    return originalRequest.call(this, proxyUrl, request);
+                }
+                return originalRequest.call(this, uri, request);
+            };
 
+            // ✅ VLC जैसी स्मूद स्ट्रीमिंग के लिए कॉन्फ़िगरेशन
+            player.configure({
+                streaming: {
+                    bufferingGoal: 45,
+                    rebufferingGoal: 15,
+                    bufferBehind: 30,
+                    retryParameters: {
+                        maxAttempts: 10,
+                        timeout: 15000,
+                        baseDelay: 1000,
+                        backoffFactor: 2
+                    },
+                    hls: {
+                        allowMp2t: true,
+                        useNativeHls: false
+                    },
+                    lowLatencyMode: true,
+                    infiniteLiveStreamDuration: true
+                },
+                manifest: {
+                    hls: {
+                        liveSegmentsDelay: 2
+                    },
+                    ignoreManifestTextInfoFailures: true,
+                    ignoreTextStreamFailures: true
+                },
+                abr: {
+                    enabled: true,
+                    switchInterval: 3,
+                    bandwidthUpgradeTarget: 0.7,
+                    bandwidthDowngradeTarget: 0.8
+                }
+            });
+
+            // ✅ Error Handling
+            player.addEventListener('error', function(event) {
+                const error = event.detail;
+                console.error('❌ Shaka Error:', error);
+
+                // Error 3016 = CORS Error
+                if (error.code === 3016) {
+                    updateStatus('❌ CORS Error: ClassPlus सर्वर ने रिक्वेस्ट ब्लॉक कर दी। Proxy का उपयोग किया जा रहा है...', 'error');
+                    // Proxy के साथ दोबारा कोशिश
+                    setTimeout(() => {
+                        loadVideo(player);
+                    }, 2000);
+                } else {
+                    updateStatus('❌ Error: ' + error.message, 'error');
+                }
+            });
+
+            // ✅ Buffering State
+            player.addEventListener('buffering', function(event) {
+                if (event.buffering) {
+                    updateStatus('⏳ बफर हो रहा है...', 'loading');
+                } else {
+                    updateStatus('✅ लाइव चल रहा है', '');
+                }
+            });
+
+            // ✅ वीडियो लोड करें
+            function loadVideo(p) {
+                updateStatus('🔄 वीडियो लोड हो रहा है...', 'loading');
+                p.load(MANIFEST_URL, null, 'application/x-mpegURL')
+                    .then(() => {
+                        updateStatus('✅ लाइव चल रहा है', '');
+                        console.log('✅ Shaka Player Loaded Successfully!');
+                    })
+                    .catch((err) => {
+                        console.error('❌ Load Error:', err);
+                        if (err.code === 3016) {
+                            updateStatus('❌ CORS Error: Proxy भी काम नहीं कर रहा। नया लिंक डालें या कोई दूसरा Proxy try करें।', 'error');
+                        } else {
+                            updateStatus('❌ ' + err.message, 'error');
+                        }
+                    });
+            }
+
+            // Start Loading
+            loadVideo(player);
+
+            // 🔄 अगर वीडियो रुक जाए तो Auto-Retry (हर 10 सेकंड में चेक)
+            setInterval(() => {
+                if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended && videoElement.readyState < 2) {
+                    console.log('🔄 वीडियो रुका हुआ है, रिलोड कर रहे हैं...');
+                    updateStatus('🔄 वीडियो रिलोड किया जा रहा है...', 'loading');
+                    loadVideo(player);
+                }
+            }, 10000);
+        }
+
+        // ============================================================
+        // 🚀 Shaka Player को Initialize करें
+        // ============================================================
+        // Shaka Player Load होने का इंतज़ार करें
+        if (typeof shaka !== 'undefined' && shaka.Player) {
+            initShakaPlayer();
+        } else {
+            // अगर Shaka Load न हो तो इंतज़ार करें
+            const checkShaka = setInterval(() => {
+                if (typeof shaka !== 'undefined' && shaka.Player) {
+                    clearInterval(checkShaka);
+                    initShakaPlayer();
+                }
+            }, 500);
+        }
+
+        console.log('✅ Shaka Player + CORS Proxy Setup Complete!');
+        console.log('📺 Link:', MANIFEST_URL);
     })();
 </script>
 </body>
