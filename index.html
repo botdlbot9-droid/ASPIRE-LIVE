@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>लाइव स्ट्रीम</title>
+  
+  <!-- LivePlayer CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@zeronx/liveplayer@latest/dist/liveplayer.min.css" />
+  
+  <!-- तुम्हारा CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,8 +19,9 @@
       <div class="live-badge">लाइव</div>
     </div>
 
+    <!-- LivePlayer कंटेनर -->
     <div class="video-wrapper">
-      <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
+      <div id="player-container"></div>
     </div>
 
     <div class="status-bar">
@@ -30,9 +36,14 @@
     </div>
 
     <div id="errorMsg" class="error-msg">❌ वीडियो लोड नहीं हुआ।</div>
-    <div class="footer">⚡ Render पर होस्ट किया गया</div>
+    <div class="footer">⚡ Render पर होस्ट किया गया | LivePlayer</div>
   </div>
 
+  <!-- ज़रूरी लाइब्रेरी -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zeronx/liveplayer@latest/dist/liveplayer.umd.min.js"></script>
+  
+  <!-- तुम्हारा JS -->
   <script src="script.js"></script>
 </body>
 </html>
