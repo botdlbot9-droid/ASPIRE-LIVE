@@ -154,21 +154,6 @@ body {
   display: block;
 }
 
-.status-msg {
-  color: #f7971e;
-  font-size: 14px;
-  margin-top: 8px;
-  padding: 10px 16px;
-  background: rgba(247, 151, 30, 0.1);
-  border-radius: 10px;
-  border-left: 3px solid #f7971e;
-  display: none;
-}
-
-.status-msg.show {
-  display: block;
-}
-
 @media (max-width: 600px) {
   .container {
     padding: 15px;
