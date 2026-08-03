@@ -4,7 +4,14 @@
 const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
 // CORS Proxy (ClassPlus के CORS को बायपास करने के लिए)
+// इनमें से कोई एक Proxy इस्तेमाल करें:
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+// या
 const CORS_PROXY = "https://corsproxy.io/?url=";
+// या
+const CORS_PROXY = "https://proxy.cors.sh/";
+// या
+const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
 
 let hls = null;
 let reloadAttempts = 0;
