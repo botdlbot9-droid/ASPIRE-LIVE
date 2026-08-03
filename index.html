@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>लाइव स्ट्रीम - HLS Player</title>
     <style>
-        /* Reset & Base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #0a0a0a;
@@ -17,15 +22,18 @@
             align-items: center;
             padding: 20px;
         }
+
         .container {
             max-width: 1100px;
             width: 100%;
             background: #1a1a2e;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             border: 1px solid #2a2a4e;
         }
+
+        /* ===== HEADER ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -34,6 +42,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
+
         .header h1 {
             font-size: 24px;
             background: linear-gradient(135deg, #f7971e, #ffd200);
@@ -41,6 +50,7 @@
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
+
         .live-badge {
             background: #ff0000;
             padding: 8px 20px;
@@ -53,22 +63,33 @@
             align-items: center;
             gap: 8px;
         }
+
         .live-badge::before {
             content: "●";
             font-size: 18px;
             animation: pulse 1s infinite;
         }
-        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
-        @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } }
 
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* ===== VIDEO WRAPPER ===== */
         .video-wrapper {
             position: relative;
             background: #000;
             border-radius: 16px;
             overflow: hidden;
-            aspect-ratio: 16/9;
+            aspect-ratio: 16 / 9;
             width: 100%;
         }
+
         #videoPlayer {
             width: 100%;
             height: 100%;
@@ -76,6 +97,7 @@
             background: #000;
         }
 
+        /* ===== STATUS BAR ===== */
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -88,12 +110,14 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .viewer-count {
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 16px;
         }
+
         .viewer-count .number {
             font-weight: 800;
             font-size: 22px;
@@ -101,6 +125,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .status-dot {
             width: 10px;
             height: 10px;
@@ -109,14 +134,21 @@
             display: inline-block;
             animation: pulse 1.5s infinite;
         }
-        .status-text { color: #00ff88; font-weight: 600; font-size: 15px; }
 
+        .status-text {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* ===== INPUT SECTION ===== */
         .input-section {
             margin-top: 18px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
+
         .input-section input {
             flex: 1;
             padding: 12px 18px;
@@ -127,8 +159,18 @@
             font-size: 15px;
             min-width: 200px;
             outline: none;
+            transition: 0.3s;
         }
-        .input-section input:focus { border-color: #f7971e; }
+
+        .input-section input:focus {
+            border-color: #f7971e;
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
+        }
+
+        .input-section input::placeholder {
+            color: #666;
+        }
+
         .input-section button {
             padding: 12px 28px;
             border-radius: 12px;
@@ -139,9 +181,46 @@
             font-size: 15px;
             cursor: pointer;
             transition: 0.3s;
+            white-space: nowrap;
         }
-        .input-section button:hover { transform: scale(1.04); box-shadow: 0 8px 30px rgba(247,151,30,0.4); }
 
+        .input-section button:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.4);
+        }
+
+        /* ===== MESSAGES ===== */
+        .message {
+            font-size: 14px;
+            margin-top: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .message.success {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+        }
+
+        .message.info {
+            color: #f7971e;
+            background: rgba(247, 151, 30, 0.1);
+            border-left: 3px solid #f7971e;
+        }
+
+        /* ===== FOOTER ===== */
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -150,48 +229,48 @@
             border-top: 1px solid #1a1a3e;
             padding-top: 18px;
         }
-        .error-msg {
-            color: #ff6b6b;
-            font-size: 14px;
-            margin-top: 8px;
-            padding: 10px 16px;
-            background: rgba(255,0,0,0.1);
-            border-radius: 10px;
-            border-left: 3px solid #ff6b6b;
-            display: none;
-        }
-        .error-msg.show { display: block; }
-        .success-msg {
-            color: #00ff88;
-            font-size: 14px;
-            margin-top: 8px;
-            padding: 10px 16px;
-            background: rgba(0,255,136,0.1);
-            border-radius: 10px;
-            border-left: 3px solid #00ff88;
-            display: none;
-        }
-        .success-msg.show { display: block; }
 
+        .footer a {
+            color: #888;
+            text-decoration: none;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
-            .container { padding: 15px; }
-            .header h1 { font-size: 18px; }
-            .status-bar { flex-direction: column; align-items: flex-start; }
+            .container {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .input-section input {
+                min-width: 100%;
+            }
+            .input-section button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- ===== HEADER ===== -->
         <div class="header">
             <h1>📺 लाइव स्ट्रीम</h1>
             <div class="live-badge">लाइव</div>
         </div>
 
+        <!-- ===== VIDEO PLAYER ===== -->
         <div class="video-wrapper">
             <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
         </div>
 
+        <!-- ===== STATUS BAR ===== -->
         <div class="status-bar">
             <div class="viewer-count">
                 <span class="status-dot"></span>
@@ -203,38 +282,53 @@
             </div>
         </div>
 
+        <!-- ===== INPUT SECTION ===== -->
         <div class="input-section">
             <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें..." />
             <button onclick="loadManualLink()">🎬 लोड करें</button>
         </div>
 
-        <div id="successMsg" class="success-msg">✅ वीडियो लोड हो गया!</div>
-        <div id="errorMsg" class="error-msg">❌ वीडियो लोड नहीं हुआ।</div>
-        <div class="footer">⚡ HLS.js Player | VLC जैसा अनुभव</div>
+        <!-- ===== MESSAGES ===== -->
+        <div id="message" class="message"></div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer">
+            ⚡ hls.js प्लेयर | VLC जैसा अनुभव | <span id="playerInfo">तैयार</span>
+        </div>
     </div>
 
-    <!-- hls.js Library -->
+    <!-- ============================================================== -->
+    <!-- hls.js LIBRARY (CDN) -->
+    <!-- ============================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
+    <!-- ============================================================== -->
+    <!-- MAIN SCRIPT -->
+    <!-- ============================================================== -->
     <script>
         // ============================================================
-        // 🔴🔴🔴 APNA REAL .m3u8 LINK YAHAN DAALEIN 🔴🔴🔴
+        // 🔴🔴🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴🔴🔴
         // ============================================================
         const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
+        // ============================================================
+        // VARIABLES
+        // ============================================================
         let hls = null;
         let retryCount = 0;
         const MAX_RETRIES = 999;
+        let isManualLoad = false;
+        let currentUrl = DEFAULT_VIDEO_URL;
 
         const video = document.getElementById('videoPlayer');
         const viewerCountEl = document.getElementById('viewerCount');
         const statusText = document.getElementById('statusText');
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
+        const messageEl = document.getElementById('message');
         const inputField = document.getElementById('videoUrlInput');
+        const playerInfo = document.getElementById('playerInfo');
 
         // ============================================================
-        // 👁️ Viewer Count (Simulated)
+        // 👁️ VIEWER COUNTER (Simulated)
         // ============================================================
         function startViewerCounter() {
             let count = Math.floor(Math.random() * 40) + 12;
@@ -250,167 +344,226 @@
         startViewerCounter();
 
         // ============================================================
-        // 🎬 VLC जैसा HLS Player - hls.js
+        // 📢 MESSAGE HELPER
+        // ============================================================
+        function showMessage(msg, type) {
+            messageEl.textContent = msg;
+            messageEl.className = 'message show ' + (type || 'info');
+            // Auto-hide success/info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                clearTimeout(messageEl._hideTimer);
+                messageEl._hideTimer = setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        function hideMessage() {
+            messageEl.classList.remove('show');
+            clearTimeout(messageEl._hideTimer);
+        }
+
+        // ============================================================
+        // 🎬 LOAD VIDEO - hls.js with VLC-like settings
         // ============================================================
         function loadVideo(url) {
             if (!url || url.trim() === "") {
-                showError("❌ कृपया एक वैध लिंक डालें!");
+                showMessage("❌ कृपया एक वैध .m3u8 लिंक डालें!", "error");
                 return;
             }
 
-            hideAllMessages();
+            currentUrl = url;
+            hideMessage();
             statusText.textContent = "⏳ लोड हो रहा है...";
+            playerInfo.textContent = "लोड हो रहा...";
 
+            // Destroy old instance
             if (hls) {
                 hls.destroy();
                 hls = null;
             }
 
+            // ============================================================
             // Safari / iOS - Native HLS
+            // ============================================================
             if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
                 video.play().catch(function(e) {
                     console.warn('Autoplay blocked:', e);
+                    showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
                 });
-                showSuccess("✅ वीडियो लोड हो गया!");
+                statusText.textContent = "✅ लाइव चल रहा है (Native)";
+                playerInfo.textContent = "Safari Native Player";
+                showMessage("✅ वीडियो लोड हो गया!", "success");
                 return;
             }
 
-            // ✅ hls.js - VLC जैसी सेटिंग्स
+            // ============================================================
+            // hls.js - VLC जैसी सेटिंग्स
+            // ============================================================
             if (Hls.isSupported()) {
-                hls = new Hls({
+                try {
+                    hls = new Hls({
 
-                    // 🟢 Adaptive Bitrate (ABR) - VLC की tarah
-                    abrEwmaDefaultEstimate: 500000,
-                    abrEwmaFastLive: 3.0,
-                    abrEwmaSlowLive: 9.0,
+                        // 🟢 Adaptive Bitrate (ABR)
+                        abrEwmaDefaultEstimate: 500000,
+                        abrEwmaFastLive: 3.0,
+                        abrEwmaSlowLive: 9.0,
 
-                    // 🟢 Buffer Settings - VLC ki tarah pehle se load karein
-                    maxBufferLength: 60,           // 60 second buffer
-                    maxMaxBufferLength: 120,
-                    maxBufferSize: 60 * 1000 * 1000,
-                    startFragPrefetch: true,       // Pehle se load karna shuru karein
+                        // 🟢 Buffer Settings - VLC ki tarah
+                        maxBufferLength: 60,
+                        maxMaxBufferLength: 120,
+                        maxBufferSize: 60 * 1000 * 1000,
+                        startFragPrefetch: true,
 
-                    // 🟢 Live Stream Settings
-                    liveDurationInfinity: true,
-                    liveMaxLatencyDurationCount: 10,
-                    liveSyncDurationCount: 10,
+                        // 🟢 Live Stream Settings
+                        liveDurationInfinity: true,
+                        liveMaxLatencyDurationCount: 10,
+                        liveSyncDurationCount: 10,
 
-                    // 🟢 Retry Logic - VLC ki tarah
-                    fragLoadingTimeOut: 60000,
-                    manifestLoadingTimeOut: 60000,
-                    levelLoadingTimeOut: 60000,
+                        // 🟢 Retry Logic
+                        fragLoadingTimeOut: 60000,
+                        manifestLoadingTimeOut: 60000,
+                        levelLoadingTimeOut: 60000,
 
-                    // 🟢 Low Latency Mode
-                    lowLatencyMode: true,
-                    enableWorker: true,
-                    testBandwidth: true
-                });
-
-                hls.loadSource(url);
-                hls.attachMedia(video);
-
-                // ✅ Manifest Parse Ho Gaya
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    console.log('✅ MANIFEST PARSED');
-                    statusText.textContent = "✅ लाइव चल रहा है";
-                    showSuccess("✅ वीडियो लोड हो गया!");
-                    video.play().catch(function(e) {
-                        console.warn('Autoplay blocked:', e);
+                        // 🟢 Performance
+                        lowLatencyMode: true,
+                        enableWorker: true,
+                        testBandwidth: true
                     });
-                });
 
-                // ✅ Fragment Loaded - Har segment load hone par
-                hls.on(Hls.Events.FRAG_LOADED, function() {
-                    console.log('✅ FRAGMENT LOADED');
-                    statusText.textContent = "✅ लाइव चल रहा है";
-                    hideAllMessages();
-                });
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
 
-                // ✅ Buffer Stalled - VLC ki tarah recover
-                hls.on(Hls.Events.BUFFER_STALLED, function() {
-                    console.log('🔄 BUFFER STALLED, recovering...');
-                    statusText.textContent = "🔄 बफर हो रहा है...";
-                    setTimeout(() => {
-                        if (hls) {
-                            hls.startLoad();
-                        }
-                    }, 1000);
-                });
+                    // ✅ MANIFEST PARSED
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        console.log('✅ MANIFEST PARSED');
+                        statusText.textContent = "✅ लाइव चल रहा है";
+                        playerInfo.textContent = "hls.js v" + Hls.version;
+                        showMessage("✅ वीडियो लोड हो गया!", "success");
+                        video.play().catch(function(e) {
+                            console.warn('Autoplay blocked:', e);
+                            showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
+                        });
+                    });
 
-                // ✅ Error Recovery - VLC ki tarah retry
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    console.log('⚠️ ERROR:', data.type, data.details);
+                    // ✅ FRAGMENT LOADED
+                    hls.on(Hls.Events.FRAG_LOADED, function() {
+                        statusText.textContent = "✅ लाइव चल रहा है";
+                        hideMessage();
+                    });
 
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log('🔄 NETWORK ERROR, recovering...');
-                                statusText.textContent = "🔄 कनेक्शन पुनः स्थापित...";
+                    // ✅ BUFFER STALLED - VLC की tarah recover
+                    hls.on(Hls.Events.BUFFER_STALLED, function() {
+                        console.log('🔄 BUFFER STALLED, recovering...');
+                        statusText.textContent = "🔄 बफर हो रहा है...";
+                        showMessage("🔄 बफर रिफ्रेश किया जा रहा है...", "info");
+                        setTimeout(() => {
+                            if (hls) {
+                                hls.startLoad();
+                            }
+                        }, 1000);
+                    });
+
+                    // ✅ ERROR - VLC की tarah retry
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.log('⚠️ ERROR:', data.type, data.details);
+
+                        if (data.fatal) {
+                            switch (data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.log('🔄 NETWORK ERROR, recovering...');
+                                    statusText.textContent = "🔄 कनेक्शन पुनः स्थापित...";
+                                    showMessage("🔄 कनेक्शन पुनः स्थापित किया जा रहा है...", "info");
+                                    setTimeout(() => {
+                                        if (hls) hls.startLoad();
+                                    }, 1000);
+                                    break;
+
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.log('🔄 MEDIA ERROR, recovering...');
+                                    statusText.textContent = "🔄 मीडिया पुनः लोड...";
+                                    showMessage("🔄 मीडिया पुनः लोड किया जा रहा है...", "info");
+                                    setTimeout(() => {
+                                        if (hls) hls.recoverMediaError();
+                                    }, 1000);
+                                    break;
+
+                                default:
+                                    if (retryCount < MAX_RETRIES) {
+                                        retryCount++;
+                                        console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
+                                        statusText.textContent = `🔄 पुनः प्रयास ${retryCount}...`;
+                                        showMessage(`🔄 पुनः प्रयास ${retryCount}...`, "info");
+                                        setTimeout(function() {
+                                            loadVideo(url);
+                                        }, 2000);
+                                    } else {
+                                        showMessage("❌ वीडियो नहीं चल रहा। नया लिंक डालें।", "error");
+                                        statusText.textContent = "❌ वीडियो नहीं चल रहा";
+                                        playerInfo.textContent = "Error";
+                                    }
+                                    break;
+                            }
+                        } else {
+                            // Non-fatal error - VLC ki tarah ignore
+                            if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
+                                console.log('🔄 Fragment error, retrying...');
                                 setTimeout(() => {
                                     if (hls) hls.startLoad();
                                 }, 1000);
-                                break;
-
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log('🔄 MEDIA ERROR, recovering...');
-                                statusText.textContent = "🔄 मीडिया पुनः लोड...";
-                                setTimeout(() => {
-                                    if (hls) hls.recoverMediaError();
-                                }, 1000);
-                                break;
-
-                            default:
-                                if (retryCount < MAX_RETRIES) {
-                                    retryCount++;
-                                    console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
-                                    statusText.textContent = `🔄 पुनः प्रयास ${retryCount}...`;
-                                    setTimeout(function() {
-                                        loadVideo(url);
-                                    }, 2000);
-                                } else {
-                                    showError("❌ वीडियो नहीं चल रहा। नया लिंक डालें।");
-                                    statusText.textContent = "❌ वीडियो नहीं चल रहा";
-                                }
-                                break;
+                            }
                         }
-                    } else {
-                        // Non-fatal error - VLC ki tarah ignore
-                        if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
-                            console.log('🔄 Fragment error, retrying...');
-                            setTimeout(() => {
-                                if (hls) hls.startLoad();
-                            }, 1000);
+                    });
+
+                    // ✅ LEVEL LOADED - quality changes
+                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
+                        if (data && data.details) {
+                            const level = data.details;
+                            const height = level.height || '?';
+                            const width = level.width || '?';
+                            const bitrate = level.averageBitrate ? (level.averageBitrate / 1000).toFixed(0) : '?';
+                            playerInfo.textContent = `${width}x${height} @ ${bitrate}kbps`;
                         }
-                    }
-                });
+                    });
+
+                } catch (error) {
+                    console.error('❌ hls.js Error:', error);
+                    showMessage("❌ प्लेयर शुरू नहीं हो पाया: " + error.message, "error");
+                    statusText.textContent = "❌ प्लेयर एरर";
+                }
 
             } else {
-                showError("❌ आपका ब्राउज़र HLS सपोर्ट नहीं करता।");
+                showMessage("❌ आपका ब्राउज़र HLS सपोर्ट नहीं करता।", "error");
                 statusText.textContent = "❌ ब्राउज़र सपोर्ट नहीं करता";
             }
         }
 
         // ============================================================
-        // 🔧 Manual Link Load
+        // 🔧 MANUAL LINK LOAD
         // ============================================================
         function loadManualLink() {
             const url = inputField.value.trim();
             if (url) {
+                isManualLoad = true;
                 retryCount = 0;
                 loadVideo(url);
                 localStorage.setItem('savedLink', url);
+                showMessage("✅ नया लिंक लोड किया जा रहा है...", "info");
             } else {
-                showError("❌ कृपया पहले लिंक डालें!");
+                showMessage("❌ कृपया पहले लिंक डालें!", "error");
             }
         }
 
+        // Enter key support
         inputField.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') loadManualLink();
+            if (e.key === 'Enter') {
+                loadManualLink();
+            }
         });
 
         // ============================================================
-        // 🚀 Page Load - Default Link
+        // 🚀 PAGE LOAD
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const savedLink = localStorage.getItem('savedLink');
@@ -426,50 +579,55 @@
             if (linkToLoad && linkToLoad !== "https://example.com/stream.m3u8") {
                 loadVideo(linkToLoad);
             } else {
-                showError("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।");
+                showMessage("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।", "error");
                 statusText.textContent = "❌ कोई लिंक नहीं";
+            }
+
+            // Show hls.js version
+            if (typeof Hls !== 'undefined' && Hls.version) {
+                console.log('📦 hls.js v' + Hls.version);
             }
         });
 
         // ============================================================
-        // 🔄 Auto-Retry - Video Stalled Ho toh Reload (VLC ki tarah)
+        // 🔄 AUTO-RETRY - Video Stalled हो तो Reload (VLC ki tarah)
         // ============================================================
         setInterval(function() {
             if (!video) return;
+
             // Agar video paused hai, currentTime > 0, aur readyState < 2 (buffering)
-            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2) {
+            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && !isManualLoad) {
                 console.log('🔄 Video stalled, reloading...');
                 statusText.textContent = "🔄 पुनः लोड...";
+                showMessage("🔄 वीडियो पुनः लोड किया जा रहा है...", "info");
                 const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
                 if (currentSrc) {
                     loadVideo(currentSrc);
                 }
             }
+
+            // Agar buffer health low hai (buffered range < 3 sec)
+            if (video.buffered.length > 0 && !video.paused && !isManualLoad) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                const currentTime = video.currentTime;
+                if (bufferedEnd - currentTime < 3 && video.readyState < 3) {
+                    console.log('🔄 Buffer low, reloading...');
+                    statusText.textContent = "🔄 बफर रिफ्रेश...";
+                    const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
+                    if (currentSrc) {
+                        loadVideo(currentSrc);
+                    }
+                }
+            }
         }, 5000);
 
         // ============================================================
-        // 📢 UI Helper Functions
+        // 📊 CONSOLE INFO
         // ============================================================
-        function hideAllMessages() {
-            errorMsg.classList.remove('show');
-            successMsg.classList.remove('show');
-        }
-
-        function showError(msg) {
-            errorMsg.textContent = msg;
-            errorMsg.classList.add('show');
-            successMsg.classList.remove('show');
-        }
-
-        function showSuccess(msg) {
-            successMsg.textContent = msg;
-            successMsg.classList.add('show');
-            errorMsg.classList.remove('show');
-        }
-
         console.log('✅ HLS.js Player Ready!');
         console.log('📺 Default Link:', DEFAULT_VIDEO_URL);
         console.log('💡 Ye Player VLC ki tarah ABR, Buffering, Retry, Cache sab handle karta hai.');
+        console.log('💡 Link expire ho toh naya link daal kar "लोड करें" dabayein.');
     </script>
 
 </body>
