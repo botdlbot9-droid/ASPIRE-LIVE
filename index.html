@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>लाइव स्ट्रीम</title>
     <style>
         * {
@@ -77,10 +77,10 @@
             aspect-ratio: 16 / 9;
             width: 100%;
         }
-        .video-wrapper iframe {
+        #videoPlayer {
             width: 100%;
             height: 100%;
-            border: none;
+            display: block;
             background: #000;
         }
         .status-bar {
@@ -206,13 +206,7 @@
         </div>
 
         <div class="video-wrapper">
-            <!-- ⭐ ClassPlus Official Player Embed - Isme CORS Error Nahi Aata -->
-            <iframe 
-                id="liveFrame"
-                src="https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8"
-                allow="autoplay; encrypted-media; fullscreen"
-                allowfullscreen
-            ></iframe>
+            <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
         </div>
 
         <div class="status-bar">
@@ -226,28 +220,36 @@
             </div>
         </div>
 
-        <!-- 🔧 Manual Link Input (Jab Link Expire Ho) -->
         <div class="input-section">
-            <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें..." />
+            <input type="text" id="videoUrlInput" placeholder="यहाँ नया .m3u8 लिंक पेस्ट करें..." />
             <button onclick="loadManualLink()">🎬 लोड करें</button>
         </div>
 
         <div id="successMsg" class="success-msg">✅ वीडियो लोड हो गया!</div>
-        <div id="errorMsg" class="error-msg">❌ यह लिंक iframe में नहीं चल सकता। ClassPlus के Official Player का उपयोग करें।</div>
-        <div class="footer">⚡ Render पर होस्ट किया गया | ClassPlus Official Player</div>
+        <div id="errorMsg" class="error-msg">❌ वीडियो लोड नहीं हुआ।</div>
+        <div class="footer">⚡ Render पर होस्ट किया गया | HLS.js + Proxy</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         // ============================================================
-        // 🔴 DEFAULT LINK (अपना REAL .m3u8 लिंक डालें)
+        // 🔴 अपना REAL .m3u8 लिंक यहाँ डालें
         // ============================================================
         const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
+        // ✅ CORS Proxy - CORS Error ko bypass karne ke liye
+        const CORS_PROXY = "https://corsproxy.io/?url=";
+
+        let hls = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 999;
+        let isManualLoad = false;
+
+        const video = document.getElementById('videoPlayer');
         const viewerCountEl = document.getElementById('viewerCount');
         const errorMsg = document.getElementById('errorMsg');
         const successMsg = document.getElementById('successMsg');
         const inputField = document.getElementById('videoUrlInput');
-        const liveFrame = document.getElementById('liveFrame');
 
         // ============================================================
         // 👁️ Viewer Count
@@ -266,28 +268,146 @@
         startViewerCounter();
 
         // ============================================================
-        // 🔧 Manual Link Load - iframe में
+        // 🎬 Load Video Function - HLS.js + CORS Proxy
         // ============================================================
-        function loadManualLink() {
-            const url = inputField.value.trim();
-            if (!url) {
-                errorMsg.textContent = "❌ कृपया पहले लिंक डालें!";
-                errorMsg.classList.add('show');
-                successMsg.classList.remove('show');
+        function loadVideo(url) {
+            if (!url || url.trim() === "") {
+                showError("❌ कृपया एक लिंक डालें!");
                 return;
             }
 
-            // ✅ ClassPlus URL को iframe में डालें
-            if (url.includes('classplusapp.com')) {
-                liveFrame.src = url;
-                successMsg.textContent = "✅ वीडियो लोड हो गया!";
-                successMsg.classList.add('show');
-                errorMsg.classList.remove('show');
+            hideAllMessages();
+
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+
+            // 🔑 CORS Proxy URL बनाएँ
+            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+            console.log('📺 Loading URL:', proxyUrl);
+
+            // Safari / iOS
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = proxyUrl;
+                video.play().catch(function(e) {
+                    console.warn('Autoplay blocked:', e);
+                });
+                showSuccess("✅ वीडियो लोड हो गया!");
+                return;
+            }
+
+            // Others
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    maxBufferLength: 90,
+                    maxMaxBufferLength: 180,
+                    maxBufferSize: 90 * 1000 * 1000,
+                    startFragPrefetch: true,
+                    testBandwidth: true,
+                    abrEwmaDefaultEstimate: 500000,
+                    abrEwmaFastLive: 3.0,
+                    abrEwmaSlowLive: 9.0,
+                    liveDurationInfinity: true,
+                    liveMaxLatencyDurationCount: 10,
+                    liveSyncDurationCount: 10,
+                    fragLoadingTimeOut: 60000,
+                    manifestLoadingTimeOut: 60000,
+                    levelLoadingTimeOut: 60000,
+                });
+
+                hls.loadSource(proxyUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log('✅ MANIFEST PARSED');
+                    showSuccess("✅ वीडियो लोड हो गया!");
+                    video.play().catch(function(e) {
+                        console.warn('Autoplay blocked:', e);
+                    });
+                });
+
+                // ✅ Fragment load successfully
+                hls.on(Hls.Events.FRAG_LOADED, function() {
+                    console.log('✅ FRAGMENT LOADED');
+                    hideAllMessages();
+                    showSuccess("✅ चल रहा है");
+                });
+
+                // ✅ Error Recovery
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.log('⚠️ ERROR:', data.type, data.details);
+
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log('🔄 NETWORK ERROR, recovering...');
+                                showStatus("🔄 कनेक्शन पुनः स्थापित किया जा रहा है...");
+                                setTimeout(() => {
+                                    if (hls) hls.startLoad();
+                                }, 1000);
+                                break;
+
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log('🔄 MEDIA ERROR, recovering...');
+                                showStatus("🔄 मीडिया पुनः लोड किया जा रहा है...");
+                                setTimeout(() => {
+                                    if (hls) hls.recoverMediaError();
+                                }, 1000);
+                                break;
+
+                            default:
+                                if (retryCount < MAX_RETRIES) {
+                                    retryCount++;
+                                    console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
+                                    showStatus(`🔄 पुनः प्रयास ${retryCount}...`);
+                                    setTimeout(function() {
+                                        loadVideo(url);
+                                    }, 2000);
+                                } else {
+                                    showError("❌ वीडियो नहीं चल रहा। नया लिंक डालें।");
+                                }
+                                break;
+                        }
+                    } else {
+                        // Non-fatal: retry
+                        if (data.details === 'fragLoadError' || data.details === 'fragParsingError') {
+                            console.log('🔄 Fragment error, retrying...');
+                            setTimeout(() => {
+                                if (hls) hls.startLoad();
+                            }, 1000);
+                        }
+                    }
+                });
+
+                // ✅ Buffer Stalled
+                hls.on(Hls.Events.BUFFER_STALLED, function() {
+                    console.log('🔄 BUFFER STALLED, recovering...');
+                    showStatus("🔄 बफर रिफ्रेश किया जा रहा है...");
+                    setTimeout(() => {
+                        if (hls) hls.startLoad();
+                    }, 1000);
+                });
+
+            } else {
+                showError("❌ Browser HLS support nahi karta.");
+            }
+        }
+
+        // ============================================================
+        // 🔧 Manual Link Load
+        // ============================================================
+        function loadManualLink() {
+            const url = inputField.value.trim();
+            if (url) {
+                isManualLoad = true;
+                retryCount = 0;
+                loadVideo(url);
                 localStorage.setItem('savedLink', url);
             } else {
-                errorMsg.textContent = "❌ ClassPlus के अलावा अन्य लिंक iframe में काम नहीं करते।";
-                errorMsg.classList.add('show');
-                successMsg.classList.remove('show');
+                showError("❌ कृपया पहले लिंक डालें!");
             }
         }
 
@@ -312,15 +432,79 @@
                 inputField.value = DEFAULT_VIDEO_URL;
             }
 
-            liveFrame.src = linkToLoad;
-            successMsg.textContent = "✅ वीडियो लोड हो गया!";
-            successMsg.classList.add('show');
+            if (linkToLoad && linkToLoad !== "https://example.com/stream.m3u8") {
+                loadVideo(linkToLoad);
+            } else {
+                showError("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।");
+            }
         });
 
-        console.log('✅ Live Stream Website Ready!');
-        console.log('📺 Link:', DEFAULT_VIDEO_URL);
-        console.log('💡 ClassPlus Official Player Use Ho Raha Hai, CORS Error Nahi Aayega!');
-    </script>
+        // ============================================================
+        // 🔄 Auto-Retry on Pause (Har 5 Second Check)
+        // ============================================================
+        setInterval(function() {
+            if (!video) return;
+            // Agar video paused hai, currentTime > 0, aur readyState < 2 (buffering)
+            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && !isManualLoad) {
+                console.log('🔄 Video stalled, reloading...');
+                showStatus("🔄 वीडियो पुनः लोड किया जा रहा है...");
+                const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
+                if (currentSrc) {
+                    loadVideo(currentSrc);
+                }
+            }
+        }, 5000);
 
+        // ============================================================
+        // 📢 UI Helper Functions
+        // ============================================================
+        function hideAllMessages() {
+            errorMsg.classList.remove('show');
+            successMsg.classList.remove('show');
+            // Agar status-msg class hai toh hatayein
+            const statusMsg = document.querySelector('.status-msg');
+            if (statusMsg) statusMsg.classList.remove('show');
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.classList.add('show');
+            successMsg.classList.remove('show');
+        }
+
+        function showSuccess(msg) {
+            successMsg.textContent = msg;
+            successMsg.classList.add('show');
+            errorMsg.classList.remove('show');
+        }
+
+        function showStatus(msg) {
+            // Success message ko status mein badalna
+            successMsg.textContent = msg;
+            successMsg.classList.add('show');
+            // Color change for status (keep it visible)
+            successMsg.style.color = '#f7971e';
+            successMsg.style.borderLeftColor = '#f7971e';
+            errorMsg.classList.remove('show');
+        }
+
+        // Reset success message color after success
+        function resetSuccessColor() {
+            successMsg.style.color = '#00ff88';
+            successMsg.style.borderLeftColor = '#00ff88';
+        }
+
+        // Override showSuccess to reset color
+        const originalShowSuccess = showSuccess;
+        showSuccess = function(msg) {
+            resetSuccessColor();
+            originalShowSuccess(msg);
+        };
+
+        console.log('✅ Live Stream Website Ready!');
+        console.log('📺 Default Link:', DEFAULT_VIDEO_URL);
+        console.log('🔀 CORS Proxy:', CORS_PROXY);
+        console.log('💡 Link expire ho toh naya link daal kar "लोड करें" dabayein.');
+    </script>
 </body>
 </html>
