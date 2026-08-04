@@ -493,8 +493,13 @@
             <div class="verify-icon">🔑</div>
             <div class="verify-title">Access Code Required</div>
             <div class="verify-subtitle">Enter your one-time access key to watch the live stream</div>
-            <input type="text" class="verify-input" id="keyInput" placeholder="Enter 8-digit key" maxlength="8" autofocus>
-            <button class="verify-btn" onclick="verifyKey()">🔓 Unlock Stream</button>
+            
+            <!-- ✅ FORM ELEMENT ADDED FOR ENTER KEY SUPPORT -->
+            <form id="verifyForm" onsubmit="return false;">
+                <input type="text" class="verify-input" id="keyInput" placeholder="Enter 8-digit key" maxlength="8" autofocus>
+                <button type="submit" class="verify-btn" id="verifyBtn">🔓 Unlock Stream</button>
+            </form>
+            
             <div id="verifyMessage" class="verify-error"></div>
 
             <div class="key-list-container">
@@ -577,6 +582,7 @@
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration
+         *  - ✅ Enter key now works on the input field
          * ================================================================
          */
 
@@ -584,8 +590,8 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        const CLASS_NAME = "Determinant 4";
-        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
+        const CLASS_NAME = "ClassPlus Live";
+        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
         // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
@@ -606,6 +612,7 @@
         const verifyMessage = document.getElementById('verifyMessage');
         const keyGrid = document.getElementById('keyGrid');
         const toast = document.getElementById('toastMessage');
+        const verifyForm = document.getElementById('verifyForm');
 
         const statusText = document.getElementById('statusText');
         const playerInfo = document.getElementById('playerInfo');
@@ -616,7 +623,7 @@
         // ============================================================
         // 🏷️ SET CLASS NAME
         // ============================================================
-        classNameText.textContent = Determinant 4;
+        classNameText.textContent = CLASS_NAME;
 
         // ============================================================
         // 🔑 RENDER KEYS WITH CLICK-TO-COPY
@@ -723,10 +730,18 @@
         }
 
         // ============================================================
-        // ⌨️ Enter Key Support
+        // ⌨️ Enter Key Support - FIXED ✅
         // ============================================================
+        // Method 1: Using form submit event (most reliable)
+        verifyForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent page refresh
+            verifyKey();
+        });
+
+        // Method 2: Direct keypress on input (backup)
         keyInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 verifyKey();
             }
         });
@@ -871,6 +886,7 @@
             console.log('🔒 Referer: REMOVED');
             console.log('💡 Click any key to copy');
             console.log('⏱️ Duration tracking enabled');
+            console.log('⌨️ Press ENTER to verify key');
         });
 
         // ============================================================
