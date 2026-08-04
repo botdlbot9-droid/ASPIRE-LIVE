@@ -575,8 +575,9 @@
             </div>
 
             <div class="controls-bar">
+                <!-- 🔥 BUTTON TEXT CHANGE - LIVE REFRESH -->
                 <button class="btn btn-live" onclick="loadLiveStream()">
-                    <span class="pulse-ring"></span> लाइव देखें
+                    <span class="pulse-ring"></span> LIVE REFRESH
                 </button>
             </div>
 
@@ -619,6 +620,7 @@
          *  - Shows lecture duration in HH:MM:SS format (from video)
          *  - Shows actual system time (real time)
          *  - ✅ Enter key works on the input field
+         *  - 🔄 Button text: "LIVE REFRESH"
          * ================================================================
          */
 
@@ -627,8 +629,6 @@
         // ============================================================
 
         const CLASS_NAME = "ClassPlus Live";
-
-        // ⭐⭐⭐ NEW VIDEO URL - CHANGE KAR DIYA GAYA HAI ⭐⭐⭐
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
         // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
@@ -834,7 +834,7 @@
                 statusText.textContent = '✅ तैयार';
                 playerInfo.textContent = 'Video.js + hls.js';
                 showMessage('✅ प्लेयर तैयार है', 'success');
-                updateActualTime(); // Start actual time
+                updateActualTime();
             });
 
             player.on('error', function() {
@@ -871,7 +871,6 @@
                 }
             });
 
-            // Reset duration on end or load
             player.on('ended', function() {
                 durationDisplay.textContent = '00:00:00';
             });
@@ -938,12 +937,13 @@
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
-            console.log('📺 NEW Video URL:', VIDEO_URL);
+            console.log('📺 Video URL:', VIDEO_URL);
             console.log('🔒 Referer: REMOVED');
             console.log('💡 Click any key to copy');
             console.log('⏱️ Lecture Duration: HH:MM:SS (from video)');
             console.log('🕐 Actual Time: System time (real-time)');
             console.log('⌨️ Press ENTER to verify key');
+            console.log('🔄 Button: LIVE REFRESH');
         });
 
         // ============================================================
