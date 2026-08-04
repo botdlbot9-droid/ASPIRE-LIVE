@@ -1,109 +1,160 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>लाइव स्ट्रीम - HLS Player</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveStream Pro - HLS Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* ============================================================
-           CSS - पूरा स्टाइल
-           ============================================================ */
-
-        /* ----- Reset & Base ----- */
+        /* ================================================================
+           CSS - PROFESSIONAL DARK THEME
+           ================================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121e;
+            --bg-card: #1a1a2e;
+            --bg-input: #0f0f23;
+            --border-color: #2a2a4e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6a6a8a;
+            --accent-gold: #f7971e;
+            --accent-gold-light: #ffd200;
+            --accent-green: #00ff88;
+            --accent-red: #ff0044;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
-            background: #1a1a2e;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            border: 1px solid #2a2a4e;
+            margin: 0 auto;
         }
 
-        /* ----- Header ----- */
-        .header {
+        /* ----- NAVBAR ----- */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
         }
 
-        .header h1 {
-            font-size: 24px;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #0a0a12;
             font-weight: 800;
         }
 
-        .live-badge {
-            background: #ff0000;
-            padding: 8px 20px;
-            border-radius: 50px;
+        .brand-text {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-            animation: blink 1.2s infinite;
+            color: var(--text-secondary);
+        }
+
+        .live-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
+            background: rgba(255, 0, 68, 0.15);
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 0, 68, 0.3);
         }
 
-        .live-badge::before {
-            content: "●";
-            font-size: 18px;
-            animation: pulse 1s infinite;
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            animation: pulse-dot 1.2s infinite;
         }
 
-        @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.7); }
         }
 
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.3;
-                transform: scale(0.8);
-            }
+        .live-text {
+            color: var(--accent-red);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* ----- Video ----- */
-        .video-wrapper {
+        /* ----- MAIN CARD ----- */
+        .main-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        /* ----- PLAYER WRAPPER ----- */
+        .player-wrapper {
             position: relative;
             background: #000;
-            border-radius: 16px;
+            border-radius: var(--radius-sm);
             overflow: hidden;
             aspect-ratio: 16 / 9;
             width: 100%;
+            margin-bottom: 20px;
         }
 
         #videoPlayer {
@@ -113,104 +164,126 @@
             background: #000;
         }
 
-        /* ----- Status Bar ----- */
+        /* ----- CONTROLS BAR (Live Button Only) ----- */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 12px 36px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-live {
+            background: linear-gradient(135deg, var(--accent-red), #cc0033);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.4);
+        }
+
+        .btn-live:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.6);
+        }
+
+        .btn-live:active {
+            transform: scale(0.95);
+        }
+
+        .btn-live .pulse-ring {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .btn-refresh {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-refresh:hover {
+            border-color: var(--accent-gold);
+            color: var(--text-primary);
+        }
+
+        /* ----- STATUS BAR ----- */
         .status-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 18px;
-            padding: 12px 18px;
-            background: #12122a;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
         }
 
-        .viewer-count {
+        .status-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 16px;
+            gap: 8px;
+            font-size: 13px;
         }
 
-        .viewer-count .number {
-            font-weight: 800;
-            font-size: 22px;
-            background: linear-gradient(135deg, #00c6fb, #005bea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .status-item .label {
+            color: var(--text-secondary);
         }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #00ff88;
+        .status-item .value {
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .status-item .value.error {
+            color: var(--accent-red);
+        }
+
+        .status-dot-green {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
             border-radius: 50%;
             display: inline-block;
-            animation: pulse 1.5s infinite;
+            animation: pulse-dot 1.5s infinite;
         }
 
-        .status-text {
-            color: #00ff88;
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        /* ----- Input Section ----- */
-        .input-section {
-            margin-top: 18px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .input-section input {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-            background: #0f0f23;
-            color: #fff;
-            font-size: 15px;
-            min-width: 200px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .input-section input:focus {
-            border-color: #f7971e;
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
-        }
-
-        .input-section input::placeholder {
-            color: #666;
-        }
-
-        .input-section button {
-            padding: 12px 28px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #0a0a0a;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .input-section button:hover {
-            transform: scale(1.04);
-            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.4);
-        }
-
-        /* ----- Messages ----- */
+        /* ----- MESSAGE ----- */
         .message {
             font-size: 14px;
-            margin-top: 8px;
             padding: 10px 16px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: none;
+            margin-bottom: 12px;
         }
 
         .message.show {
@@ -219,164 +292,214 @@
 
         .message.error {
             color: #ff6b6b;
-            background: rgba(255, 0, 0, 0.1);
+            background: rgba(255, 0, 0, 0.08);
             border-left: 3px solid #ff6b6b;
         }
 
         .message.success {
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-            border-left: 3px solid #00ff88;
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.08);
+            border-left: 3px solid var(--accent-green);
         }
 
         .message.info {
-            color: #f7971e;
-            background: rgba(247, 151, 30, 0.1);
-            border-left: 3px solid #f7971e;
+            color: var(--accent-gold);
+            background: rgba(247, 151, 30, 0.08);
+            border-left: 3px solid var(--accent-gold);
         }
 
-        /* ----- Footer ----- */
+        /* ----- FOOTER ----- */
         .footer {
-            margin-top: 20px;
+            margin-top: 24px;
             text-align: center;
-            color: #555;
+            color: var(--text-muted);
             font-size: 13px;
-            border-top: 1px solid #1a1a3e;
-            padding-top: 18px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
         }
 
-        /* ----- Responsive ----- */
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            .header h1 {
-                font-size: 18px;
-            }
-            .status-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .input-section input {
-                min-width: 100%;
-            }
-            .input-section button {
-                width: 100%;
-            }
+        .footer .highlight {
+            color: var(--accent-gold);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .main-card { padding: 16px; }
+            .navbar { padding: 12px 16px; }
+            .brand-text { font-size: 16px; }
+            .status-bar { flex-direction: column; align-items: flex-start; }
+            .btn { justify-content: center; width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .brand-text { font-size: 14px; }
+            .nav-status .live-text { font-size: 10px; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- ===== HEADER ===== -->
-        <div class="header">
-            <h1>📺 लाइव स्ट्रीम</h1>
-            <div class="live-badge">लाइव</div>
-        </div>
 
-        <!-- ===== VIDEO PLAYER ===== -->
-        <div class="video-wrapper">
-            <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
-        </div>
-
-        <!-- ===== STATUS BAR ===== -->
-        <div class="status-bar">
-            <div class="viewer-count">
-                <span class="status-dot"></span>
-                <span class="status-text" id="statusText">लाइव चल रहा है</span>
+        <!-- ===== NAVBAR ===== -->
+        <header class="navbar">
+            <a href="#" class="brand">
+                <span class="brand-icon"><i class="fas fa-play"></i></span>
+                <span class="brand-text">LiveStream Pro</span>
+            </a>
+            <div class="nav-status">
+                <span class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span class="live-text">लाइव</span>
+                </span>
+                <span style="color: var(--text-muted); font-size: 13px;">
+                    <i class="fas fa-users" style="margin-right: 4px;"></i>
+                    <span id="viewerCountNav">0</span>
+                </span>
             </div>
-            <div class="viewer-count">
-                <span class="label">👁️ देख रहे हैं:</span>
-                <span class="number" id="viewerCount">0</span>
+        </header>
+
+        <!-- ===== MAIN CARD ===== -->
+        <main class="main-card">
+
+            <!-- ===== VIDEO PLAYER ===== -->
+            <div class="player-wrapper">
+                <video id="videoPlayer" controls playsinline autoplay preload="auto"></video>
             </div>
-        </div>
 
-        <!-- ===== INPUT SECTION ===== -->
-        <div class="input-section">
-            <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें..." />
-            <button onclick="loadManualLink()">🎬 लोड करें</button>
-        </div>
+            <!-- ===== CONTROLS BAR (Live Button Only) ===== -->
+            <div class="controls-bar">
+                <button class="btn btn-live" onclick="loadLiveStream()">
+                    <span class="pulse-ring"></span>
+                    लाइव देखें
+                </button>
+                <button class="btn btn-refresh" onclick="refreshStream()">
+                    <i class="fas fa-sync-alt"></i> रिफ्रेश
+                </button>
+            </div>
 
-        <!-- ===== MESSAGE AREA ===== -->
-        <div id="message" class="message"></div>
+            <!-- ===== STATUS BAR ===== -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot-green"></span>
+                    <span class="label">स्थिति:</span>
+                    <span class="value" id="statusText">तैयार</span>
+                </div>
+                <div class="status-item">
+                    <span class="label"><i class="fas fa-eye"></i> दर्शक:</span>
+                    <span class="value" id="viewerCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="label"><i class="fas fa-microchip"></i> प्लेयर:</span>
+                    <span class="value" id="playerInfo">hls.js</span>
+                </div>
+                <div class="status-item">
+                    <span class="label"><i class="fas fa-signal"></i> क्वालिटी:</span>
+                    <span class="value" id="qualityInfo">-</span>
+                </div>
+            </div>
+
+            <!-- ===== MESSAGE ===== -->
+            <div id="message" class="message"></div>
+
+            <!-- ===== PROXY STATUS ===== -->
+            <div style="margin-top: 12px; font-size: 12px; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+                🔗 Proxy: <span id="proxyInfo">Connecting...</span>
+            </div>
+
+        </main>
 
         <!-- ===== FOOTER ===== -->
-        <div class="footer">
-            ⚡ hls.js प्लेयर | <span id="playerInfo">तैयार</span>
-        </div>
+        <footer class="footer">
+            <p>
+                ⚡ <span class="highlight">LiveStream Pro</span> —
+                HLS Player · Livepush Style · No CORS Errors
+                <br>
+                <span style="font-size: 12px; color: var(--text-muted);">
+                    <i class="fas fa-heart" style="color: var(--accent-red);"></i>
+                    Made with ❤️
+                </span>
+            </p>
+        </footer>
+
     </div>
 
     <!-- ============================================================ -->
-    <!-- hls.js LIBRARY (CDN) -->
+    <!-- hls.js LIBRARY -->
     <!-- ============================================================ -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT - Extension-style player (CORS Proxy + Headers) -->
+    <!-- JAVASCRIPT - Live Button Only -->
     <!-- ============================================================ -->
     <script>
-        // ============================================================
-        // 🔴🔴🔴 अपना REAL .m3u8 लिंक यहाँ डालें 🔴🔴🔴
-        // ============================================================
-        const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
+        /**
+         * ================================================================
+         *  🚀 LiveStream Pro - Live Button Only
+         *  - Fixed .m3u8 link (changes manually in code)
+         *  - "लाइव देखें" button loads the stream
+         *  - "रिफ्रेश" button reloads the player
+         * ================================================================
+         */
 
         // ============================================================
-        // 🌐 CORS PROXY (Extension-style)
+        // 🔴 FIXED .m3u8 LINK (Change this when link expires)
         // ============================================================
-        // अगर एक proxy काम न करे तो दूसरा try करें
-        const PROXY_LIST = [
-            'https://corsproxy.io/?url=',
-            'https://api.allorigins.win/raw?url=',
-            'https://cors-anywhere.herokuapp.com/'
-        ];
-        let currentProxyIndex = 0;
-
-        function getProxyUrl(url) {
-            if (url.startsWith('https://corsproxy.io/') ||
-                url.startsWith('https://api.allorigins.win/') ||
-                url.startsWith('https://cors-anywhere.herokuapp.com/')) {
-                return url;
-            }
-            return PROXY_LIST[currentProxyIndex] + encodeURIComponent(url);
-        }
-
-        function nextProxy() {
-            currentProxyIndex = (currentProxyIndex + 1) % PROXY_LIST.length;
-            console.log('🔄 Proxy switched to:', PROXY_LIST[currentProxyIndex]);
-        }
+        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 
         // ============================================================
-        // VARIABLES
+        // 🌐 PROXY SERVER URL (Your backend proxy)
+        // ============================================================
+        const PROXY_SERVER_URL = "https://your-proxy-server.onrender.com/proxy?url=";
+
+        // ============================================================
+        // 📦 DOM REFS
+        // ============================================================
+        const video = document.getElementById('videoPlayer');
+        const statusText = document.getElementById('statusText');
+        const viewerCountEl = document.getElementById('viewerCount');
+        const viewerCountNav = document.getElementById('viewerCountNav');
+        const playerInfo = document.getElementById('playerInfo');
+        const qualityInfo = document.getElementById('qualityInfo');
+        const messageEl = document.getElementById('message');
+        const proxyInfo = document.getElementById('proxyInfo');
+
+        // ============================================================
+        // 🧠 STATE
         // ============================================================
         let hls = null;
         let retryCount = 0;
         const MAX_RETRIES = 999;
-        let isManualLoad = false;
-        let currentUrl = DEFAULT_VIDEO_URL;
-        let useProxy = true;
-
-        const video = document.getElementById('videoPlayer');
-        const viewerCountEl = document.getElementById('viewerCount');
-        const statusText = document.getElementById('statusText');
-        const messageEl = document.getElementById('message');
-        const inputField = document.getElementById('videoUrlInput');
-        const playerInfo = document.getElementById('playerInfo');
+        let isLive = false;
 
         // ============================================================
         // 👁️ VIEWER COUNTER (Simulated)
         // ============================================================
         function startViewerCounter() {
-            let count = Math.floor(Math.random() * 40) + 12;
-            viewerCountEl.textContent = count;
+            let count = Math.floor(Math.random() * 50) + 15;
+            updateViewerCount(count);
             setInterval(() => {
-                let change = Math.floor(Math.random() * 7) - 3;
+                let change = Math.floor(Math.random() * 9) - 4;
                 let newCount = parseInt(viewerCountEl.textContent) + change;
-                if (newCount < 5) newCount = 5 + Math.floor(Math.random() * 10);
-                if (newCount > 150) newCount = 120 + Math.floor(Math.random() * 30);
-                viewerCountEl.textContent = newCount;
+                if (newCount < 5) newCount = 5 + Math.floor(Math.random() * 15);
+                if (newCount > 200) newCount = 150 + Math.floor(Math.random() * 50);
+                updateViewerCount(newCount);
             }, 7000);
+        }
+
+        function updateViewerCount(count) {
+            viewerCountEl.textContent = count;
+            viewerCountNav.textContent = count;
         }
         startViewerCounter();
 
@@ -400,18 +523,17 @@
         }
 
         // ============================================================
-        // 🎬 LOAD VIDEO - Extension-style (CORS Proxy + Headers)
+        // 🎬 LOAD LIVE STREAM — With Proxy
         // ============================================================
-        function loadVideo(url) {
-            if (!url || url.trim() === "") {
-                showMessage("❌ कृपया एक वैध .m3u8 लिंक डालें!", "error");
-                return;
-            }
-
-            currentUrl = url;
+        function loadLiveStream() {
             hideMessage();
             statusText.textContent = "⏳ लोड हो रहा है...";
+            statusText.className = 'value';
             playerInfo.textContent = "लोड हो रहा...";
+            qualityInfo.textContent = "-";
+
+            // Show proxy info
+            proxyInfo.textContent = PROXY_SERVER_URL;
 
             if (hls) {
                 hls.destroy();
@@ -419,156 +541,138 @@
             }
 
             // ============================================================
-            // PROXY URL
+            // 🔥 PROXY URL
             // ============================================================
-            let finalUrl = url;
-            if (useProxy) {
-                finalUrl = getProxyUrl(url);
-                console.log('🌐 Proxy URL:', finalUrl);
-            }
+            const proxyUrl = PROXY_SERVER_URL + encodeURIComponent(VIDEO_URL);
+            console.log('🌐 Proxy URL:', proxyUrl);
 
             // ============================================================
-            // SAFARI / iOS - Native HLS
+            // SAFARI / iOS — Native HLS
             // ============================================================
             if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = finalUrl;
-                video.play().catch(function(e) {
-                    console.warn('Autoplay blocked:', e);
-                    showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
+                video.src = proxyUrl;
+                video.play().catch(() => {
+                    showMessage("⚠️ ऑटोप्ले ब्लॉक, प्ले बटन दबाएँ", "info");
                 });
-                statusText.textContent = "✅ लाइव चल रहा है (Native)";
-                playerInfo.textContent = "Safari Native Player";
-                showMessage("✅ वीडियो लोड हो गया!", "success");
+                statusText.textContent = "✅ चल रहा है (Native)";
+                playerInfo.textContent = "Safari Native + Proxy";
+                showMessage("✅ लाइव स्ट्रीम शुरू!", "success");
+                isLive = true;
                 return;
             }
 
             // ============================================================
-            // hls.js - Extension-style
+            // hls.js — Proxy + Custom Headers
             // ============================================================
             if (Hls.isSupported()) {
                 try {
                     hls = new Hls({
-                        // Performance settings
                         enableWorker: true,
                         lowLatencyMode: true,
                         maxBufferLength: 60,
                         maxMaxBufferLength: 120,
                         maxBufferSize: 60 * 1000 * 1000,
                         startFragPrefetch: true,
-
-                        // Live stream settings
                         liveDurationInfinity: true,
                         liveMaxLatencyDurationCount: 10,
                         liveSyncDurationCount: 10,
-
-                        // Timeout settings
                         fragLoadingTimeOut: 60000,
                         manifestLoadingTimeOut: 60000,
                         levelLoadingTimeOut: 60000,
-
-                        // ABR settings
                         abrEwmaDefaultEstimate: 500000,
                         abrEwmaFastLive: 3.0,
                         abrEwmaSlowLive: 9.0,
                         testBandwidth: true,
-
-                        // ⭐ Extension जैसा behaviour - extra headers
                         xhrSetup: function(xhr, url) {
-                            // Extension की तरह headers
-                            xhr.setRequestHeader('Referer', 'https://classplusapp.com/');
-                            xhr.setRequestHeader('Origin', 'https://classplusapp.com/');
                             xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-                            xhr.withCredentials = true;
-                            console.log('📡 XHR Headers set for:', url);
+                            xhr.setRequestHeader('Accept', '*/*');
+                            console.log('📡 Headers set for:', url);
                         }
                     });
 
-                    hls.loadSource(finalUrl);
+                    hls.loadSource(proxyUrl);
                     hls.attachMedia(video);
 
-                    // ✅ MANIFEST PARSED
+                    // --- MANIFEST PARSED ---
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         console.log('✅ MANIFEST PARSED');
                         statusText.textContent = "✅ लाइव चल रहा है";
-                        playerInfo.textContent = "hls.js v" + Hls.version + (useProxy ? ' 🌐Proxy' : '');
-                        showMessage("✅ वीडियो लोड हो गया!", "success");
-                        video.play().catch(function(e) {
-                            console.warn('Autoplay blocked:', e);
-                            showMessage("⚠️ ऑटोप्ले ब्लॉक हुआ, प्ले बटन दबाएँ", "info");
+                        statusText.className = 'value';
+                        playerInfo.textContent = "hls.js v" + Hls.version + ' 🌐Proxy';
+                        showMessage("✅ लाइव स्ट्रीम शुरू!", "success");
+                        isLive = true;
+                        video.play().catch(() => {
+                            showMessage("⚠️ ऑटोप्ले ब्लॉक, प्ले बटन दबाएँ", "info");
                         });
                     });
 
-                    // ✅ FRAGMENT LOADED
+                    // --- FRAGMENT LOADED ---
                     hls.on(Hls.Events.FRAG_LOADED, function() {
                         statusText.textContent = "✅ लाइव चल रहा है";
+                        statusText.className = 'value';
                         hideMessage();
                     });
 
-                    // ✅ BUFFER STALLED
+                    // --- BUFFER STALLED ---
                     hls.on(Hls.Events.BUFFER_STALLED, function() {
                         console.log('🔄 BUFFER STALLED, recovering...');
-                        statusText.textContent = "🔄 बफर हो रहा है...";
-                        showMessage("🔄 बफर रिफ्रेश किया जा रहा है...", "info");
+                        statusText.textContent = "🔄 बफर...";
+                        statusText.className = 'value';
+                        showMessage("🔄 बफर रिफ्रेश...", "info");
                         setTimeout(() => {
-                            if (hls) {
-                                hls.startLoad();
-                            }
+                            if (hls) hls.startLoad();
                         }, 1000);
                     });
 
-                    // ✅ ERROR HANDLING - Proxy switch on error
+                    // --- LEVEL LOADED (Quality Info) ---
+                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
+                        if (data && data.details) {
+                            const level = data.details;
+                            const height = level.height || '?';
+                            const bitrate = level.averageBitrate ? (level.averageBitrate / 1000).toFixed(0) : '?';
+                            qualityInfo.textContent = `${height}p @ ${bitrate}kbps`;
+                        }
+                    });
+
+                    // --- ERROR HANDLING ---
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         console.log('⚠️ ERROR:', data.type, data.details);
-
-                        // अगर CORS/Network error है तो proxy switch करें
-                        if (useProxy &&
-                            (data.type === Hls.ErrorTypes.NETWORK_ERROR ||
-                                data.details === 'manifestLoadError' ||
-                                data.details === 'manifestIncompatibleCodecsError')) {
-                            if (currentProxyIndex < PROXY_LIST.length - 1) {
-                                console.log('🔄 Proxy switch कर रहे हैं...');
-                                showMessage(`🔄 Proxy बदला जा रहा है...`, 'info');
-                                nextProxy();
-                                setTimeout(() => {
-                                    loadVideo(currentUrl);
-                                }, 2000);
-                                return;
-                            }
-                        }
 
                         if (data.fatal) {
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
                                     console.log('🔄 NETWORK ERROR, recovering...');
-                                    statusText.textContent = "🔄 कनेक्शन पुनः स्थापित...";
-                                    showMessage("🔄 कनेक्शन पुनः स्थापित किया जा रहा है...", "info");
+                                    statusText.textContent = "🔄 कनेक्शन...";
+                                    showMessage("🔄 कनेक्शन पुनः स्थापित...", "info");
                                     setTimeout(() => {
                                         if (hls) hls.startLoad();
-                                    }, 1000);
+                                    }, 1500);
                                     break;
 
                                 case Hls.ErrorTypes.MEDIA_ERROR:
                                     console.log('🔄 MEDIA ERROR, recovering...');
-                                    statusText.textContent = "🔄 मीडिया पुनः लोड...";
-                                    showMessage("🔄 मीडिया पुनः लोड किया जा रहा है...", "info");
+                                    statusText.textContent = "🔄 मीडिया...";
+                                    showMessage("🔄 मीडिया पुनः लोड...", "info");
                                     setTimeout(() => {
                                         if (hls) hls.recoverMediaError();
-                                    }, 1000);
+                                    }, 1500);
                                     break;
 
                                 default:
                                     if (retryCount < MAX_RETRIES) {
                                         retryCount++;
                                         console.log(`🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
-                                        statusText.textContent = `🔄 पुनः प्रयास ${retryCount}...`;
+                                        statusText.textContent = `🔄 प्रयास ${retryCount}...`;
                                         showMessage(`🔄 पुनः प्रयास ${retryCount}...`, "info");
-                                        setTimeout(function() {
-                                            loadVideo(url);
+                                        setTimeout(() => {
+                                            loadLiveStream();
                                         }, 2000);
                                     } else {
-                                        showMessage("❌ वीडियो नहीं चल रहा। नया लिंक डालें।", "error");
-                                        statusText.textContent = "❌ वीडियो नहीं चल रहा";
+                                        showMessage("❌ स्ट्रीम नहीं चल रही। लिंक एक्सपायर हो गया होगा।", "error");
+                                        statusText.textContent = "❌ एरर";
+                                        statusText.className = 'value error';
                                         playerInfo.textContent = "Error";
+                                        isLive = false;
                                     }
                                     break;
                             }
@@ -582,117 +686,79 @@
                         }
                     });
 
-                    // ✅ LEVEL LOADED - Quality Info
-                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
-                        if (data && data.details) {
-                            const level = data.details;
-                            const height = level.height || '?';
-                            const width = level.width || '?';
-                            const bitrate = level.averageBitrate ? (level.averageBitrate / 1000).toFixed(0) : '?';
-                            playerInfo.textContent = `${width}x${height} @ ${bitrate}kbps`;
-                        }
-                    });
-
                 } catch (error) {
                     console.error('❌ hls.js Error:', error);
-                    showMessage("❌ प्लेयर शुरू नहीं हो पाया: " + error.message, "error");
-                    statusText.textContent = "❌ प्लेयर एरर";
+                    showMessage("❌ प्लेयर एरर: " + error.message, "error");
+                    statusText.textContent = "❌ एरर";
+                    statusText.className = 'value error';
+                    isLive = false;
                 }
 
             } else {
                 showMessage("❌ आपका ब्राउज़र HLS सपोर्ट नहीं करता।", "error");
-                statusText.textContent = "❌ ब्राउज़र सपोर्ट नहीं करता";
+                statusText.textContent = "❌ Unsupported";
+                statusText.className = 'value error';
+                isLive = false;
             }
         }
 
         // ============================================================
-        // 🔧 MANUAL LINK LOAD
+        // 🔄 REFRESH STREAM
         // ============================================================
-        function loadManualLink() {
-            const url = inputField.value.trim();
-            if (url) {
-                isManualLoad = true;
+        function refreshStream() {
+            if (isLive) {
+                console.log('🔄 Refreshing live stream...');
+                showMessage("🔄 स्ट्रीम रिफ्रेश हो रहा है...", "info");
                 retryCount = 0;
-                currentProxyIndex = 0;
-                loadVideo(url);
-                localStorage.setItem('savedLink', url);
-                showMessage("✅ नया लिंक लोड किया जा रहा है...", "info");
+                loadLiveStream();
             } else {
-                showMessage("❌ कृपया पहले लिंक डालें!", "error");
+                showMessage("⚠️ पहले 'लाइव देखें' दबाएँ!", "info");
             }
         }
 
-        inputField.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                loadManualLink();
-            }
-        });
-
         // ============================================================
-        // 🚀 PAGE LOAD - DEFAULT LINK
+        // 🚀 PAGE LOAD — Auto Start Live Stream
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            const savedLink = localStorage.getItem('savedLink');
-            let linkToLoad = DEFAULT_VIDEO_URL;
+            // Show proxy info
+            proxyInfo.textContent = PROXY_SERVER_URL;
 
-            if (savedLink && savedLink !== "null" && savedLink !== "") {
-                linkToLoad = savedLink;
-                inputField.value = savedLink;
-            } else {
-                inputField.value = DEFAULT_VIDEO_URL;
-            }
-
-            if (linkToLoad && linkToLoad !== "https://example.com/stream.m3u8") {
-                loadVideo(linkToLoad);
-            } else {
-                showMessage("❌ DEFAULT_VIDEO_URL में .m3u8 लिंक डालें।", "error");
-                statusText.textContent = "❌ कोई लिंक नहीं";
-            }
+            // Auto start live stream
+            loadLiveStream();
 
             if (typeof Hls !== 'undefined' && Hls.version) {
                 console.log('📦 hls.js v' + Hls.version);
             }
+
+            console.log('✅ LiveStream Pro initialized!');
+            console.log('📺 Live URL:', VIDEO_URL);
+            console.log('🌐 Proxy Server:', PROXY_SERVER_URL);
+            console.log('💡 Click "लाइव देखें" to start/restart stream');
         });
 
         // ============================================================
-        // 🔄 AUTO-RETRY
+        // 🔄 AUTO-RETRY — Video Stall Recovery
         // ============================================================
         setInterval(function() {
             if (!video) return;
 
-            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && !isManualLoad) {
+            if (video.paused && video.currentTime > 0 && !video.ended && video.readyState < 2 && isLive) {
                 console.log('🔄 Video stalled, reloading...');
-                statusText.textContent = "🔄 पुनः लोड...";
-                showMessage("🔄 वीडियो पुनः लोड किया जा रहा है...", "info");
-                const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
-                if (currentSrc) {
-                    loadVideo(currentSrc);
-                }
+                statusText.textContent = "🔄 रिलोड...";
+                showMessage("🔄 वीडियो पुनः लोड...", "info");
+                loadLiveStream();
             }
 
-            if (video.buffered.length > 0 && !video.paused && !isManualLoad) {
+            if (video.buffered.length > 0 && !video.paused && isLive) {
                 const bufferedEnd = video.buffered.end(video.buffered.length - 1);
                 const currentTime = video.currentTime;
-                if (bufferedEnd - currentTime < 3 && video.readyState < 3) {
-                    console.log('🔄 Buffer low, reloading...');
-                    statusText.textContent = "🔄 बफर रिफ्रेश...";
-                    const currentSrc = localStorage.getItem('savedLink') || DEFAULT_VIDEO_URL;
-                    if (currentSrc) {
-                        loadVideo(currentSrc);
-                    }
+                if (bufferedEnd - currentTime < 2 && video.readyState < 3) {
+                    console.log('🔄 Buffer low, refreshing...');
+                    statusText.textContent = "🔄 बफर...";
+                    loadLiveStream();
                 }
             }
         }, 5000);
-
-        // ============================================================
-        // 📊 CONSOLE INFO
-        // ============================================================
-        console.log('✅ hls.js Player Ready! (Extension-style)');
-        console.log('📺 Default Link:', DEFAULT_VIDEO_URL);
-        console.log('🌐 Proxy List:', PROXY_LIST);
-        console.log('💡 Ye player Extension की तरह CORS Proxy + custom headers use करता है');
-        console.log('💡 अगर एक proxy काम न करे तो auto-switch होगा');
     </script>
 
 </body>
-</html>
