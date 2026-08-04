@@ -354,7 +354,7 @@
         }
 
         /* ================================================================
-           🔥 DURATION DISPLAY - ACTUAL LECTURE TIME
+           🔥 DURATION DISPLAY - ONLY LECTURE TIME (Removed Actual Time)
            ================================================================ */
         .duration-bar {
             display: flex;
@@ -386,35 +386,6 @@
         .duration-bar .live-icon {
             color: #ff0044;
             animation: pulse 1.5s infinite;
-        }
-
-        /* 📌 Actual Time Display - Current System Time */
-        .actual-time-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: #0f0f23;
-            border-radius: 10px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            font-size: 13px;
-            color: #a0a0b8;
-        }
-
-        .actual-time-bar .label {
-            color: #a0a0b8;
-        }
-
-        .actual-time-bar .value {
-            font-weight: 700;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            letter-spacing: 1px;
-            min-width: 80px;
-            text-align: center;
         }
 
         .status-bar {
@@ -508,7 +479,6 @@
             .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .key-item { font-size: 14px; padding: 8px 6px; }
             .duration-bar { flex-wrap: wrap; }
-            .actual-time-bar { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -561,21 +531,14 @@
                 </video>
             </div>
 
-            <!-- 🔥 DURATION BAR - Lecture Duration -->
+            <!-- 🔥 DURATION BAR - ONLY Lecture Duration -->
             <div class="duration-bar">
                 <span class="live-icon">●</span>
                 <span class="label">⏱️ Lecture Duration:</span>
                 <span class="value" id="durationDisplay">00:00:00</span>
             </div>
 
-            <!-- 📌 ACTUAL TIME BAR - Real System Time -->
-            <div class="actual-time-bar">
-                <span class="label">🕐 Actual Time:</span>
-                <span class="value" id="actualTimeDisplay">--:--:--</span>
-            </div>
-
             <div class="controls-bar">
-                <!-- 🔥 BUTTON TEXT CHANGE - LIVE REFRESH -->
                 <button class="btn btn-live" onclick="loadLiveStream()">
                     <span class="pulse-ring"></span> LIVE REFRESH
                 </button>
@@ -618,9 +581,8 @@
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
-         *  - Shows actual system time (real time)
          *  - ✅ Enter key works on the input field
-         *  - 🔄 Button text: "LIVE REFRESH"
+         *  - 🕐 Actual Time REMOVED
          * ================================================================
          */
 
@@ -657,7 +619,6 @@
         const messageEl = document.getElementById('message');
         const classNameText = document.getElementById('classNameText');
         const durationDisplay = document.getElementById('durationDisplay');
-        const actualTimeDisplay = document.getElementById('actualTimeDisplay');
 
         // ============================================================
         // 🏷️ SET CLASS NAME
@@ -784,20 +745,6 @@
         });
 
         // ============================================================
-        // 🕐 ACTUAL TIME UPDATER (System Time)
-        // ============================================================
-        function updateActualTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            actualTimeDisplay.textContent = hours + ':' + minutes + ':' + seconds;
-        }
-
-        // Update actual time every second
-        setInterval(updateActualTime, 1000);
-
-        // ============================================================
         // 🎬 VIDEO.JS PLAYER
         // ============================================================
         let player = null;
@@ -834,7 +781,6 @@
                 statusText.textContent = '✅ तैयार';
                 playerInfo.textContent = 'Video.js + hls.js';
                 showMessage('✅ प्लेयर तैयार है', 'success');
-                updateActualTime();
             });
 
             player.on('error', function() {
@@ -933,7 +879,6 @@
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             renderKeys();
-            updateActualTime();
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
@@ -941,9 +886,9 @@
             console.log('🔒 Referer: REMOVED');
             console.log('💡 Click any key to copy');
             console.log('⏱️ Lecture Duration: HH:MM:SS (from video)');
-            console.log('🕐 Actual Time: System time (real-time)');
             console.log('⌨️ Press ENTER to verify key');
             console.log('🔄 Button: LIVE REFRESH');
+            console.log('🕐 Actual Time: REMOVED');
         });
 
         // ============================================================
