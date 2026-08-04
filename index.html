@@ -133,6 +133,87 @@
             min-height: 20px;
         }
 
+        /* ================================================================
+           🔥 KEY LIST - Click to Copy
+           ================================================================ */
+        .key-list-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #12121e;
+            border-radius: 12px;
+            border: 1px solid #2a2a4e;
+        }
+
+        .key-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #a0a0b8;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .key-item {
+            background: #0f0f23;
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            padding: 10px 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f7971e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .key-item:hover {
+            background: #1a1a3e;
+            border-color: #f7971e;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
+        }
+
+        .key-item:active {
+            transform: scale(0.95);
+        }
+
+        .key-item.copied {
+            background: #00ff88;
+            color: #0a0a12;
+            border-color: #00ff88;
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00ff88;
+            color: #0a0a12;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.3);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+        }
+
         /* ===== PLAYER PAGE ===== */
         .header {
             display: flex;
@@ -143,6 +224,12 @@
             gap: 15px;
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .header h1 {
             font-size: 24px;
             font-weight: 700;
@@ -150,6 +237,23 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .class-name {
+            background: rgba(247, 151, 30, 0.15);
+            border: 1px solid rgba(247, 151, 30, 0.3);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f7971e;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .class-name i {
+            font-size: 14px;
         }
 
         .live-badge {
@@ -249,16 +353,39 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
-        .btn-refresh {
-            background: #0f0f23;
+        /* ================================================================
+           🔥 DURATION DISPLAY - Lecture Time
+           ================================================================ */
+        .duration-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: #12121e;
+            border-radius: 10px;
             border: 1px solid #2a2a4e;
-            color: #a0a0b8;
-            padding: 12px 20px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
 
-        .btn-refresh:hover {
-            border-color: #f7971e;
-            color: #fff;
+        .duration-bar .label {
+            color: #a0a0b8;
+        }
+
+        .duration-bar .value {
+            font-weight: 700;
+            color: #f7971e;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            letter-spacing: 2px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .duration-bar .live-icon {
+            color: #ff0044;
+            animation: pulse 1.5s infinite;
         }
 
         .status-bar {
@@ -347,6 +474,11 @@
             .controls-bar { flex-direction: column; }
             .btn { justify-content: center; width: 100%; }
             .status-bar { flex-direction: column; align-items: flex-start; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .class-name { font-size: 12px; padding: 4px 12px; }
+            .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .key-item { font-size: 14px; padding: 8px 6px; }
+            .duration-bar { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -364,6 +496,11 @@
             <input type="text" class="verify-input" id="keyInput" placeholder="Enter 8-digit key" maxlength="8" autofocus>
             <button class="verify-btn" onclick="verifyKey()">🔓 Unlock Stream</button>
             <div id="verifyMessage" class="verify-error"></div>
+
+            <div class="key-list-container">
+                <div class="key-list-title">📋 Click any key to copy</div>
+                <div class="key-grid" id="keyGrid"></div>
+            </div>
         </div>
 
         <!-- ========================================================== -->
@@ -371,13 +508,17 @@
         <!-- ========================================================== -->
         <div id="playerPage" class="hidden">
 
-            <!-- Header -->
             <div class="header">
-                <h1>📺 Live Stream</h1>
+                <div class="header-left">
+                    <h1>📺 Live Stream</h1>
+                    <span class="class-name" id="liveClassName">
+                        <i class="fas fa-chalkboard-teacher"></i> 
+                        <span id="classNameText">ClassPlus Live</span>
+                    </span>
+                </div>
                 <div class="live-badge">लाइव</div>
             </div>
 
-            <!-- Video Player -->
             <div class="player-wrapper">
                 <video id="my-video" class="video-js vjs-big-play-centered vjs-16-9" 
                        controls preload="auto" playsinline
@@ -386,15 +527,19 @@
                 </video>
             </div>
 
-            <!-- Controls -->
+            <!-- 🔥 DURATION BAR - Lecture Time -->
+            <div class="duration-bar">
+                <span class="live-icon">●</span>
+                <span class="label">⏱️ Lecture Duration:</span>
+                <span class="value" id="durationDisplay">00:00</span>
+            </div>
+
             <div class="controls-bar">
                 <button class="btn btn-live" onclick="loadLiveStream()">
                     <span class="pulse-ring"></span> लाइव देखें
                 </button>
-               
             </div>
 
-            <!-- Status Bar -->
             <div class="status-bar">
                 <div class="status-item">
                     <span class="status-dot"></span>
@@ -407,10 +552,8 @@
                 </div>
             </div>
 
-            <!-- Message -->
             <div id="message" class="message"></div>
 
-            <!-- Footer -->
             <footer class="footer">
                 <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access</p>
             </footer>
@@ -419,15 +562,21 @@
     </div>
 
     <!-- ============================================================ -->
+    <!-- TOAST MESSAGE -->
+    <!-- ============================================================ -->
+    <div id="toastMessage" class="toast-message">✅ Copied!</div>
+
+    <!-- ============================================================ -->
     <!-- JAVASCRIPT -->
     <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
          *  🔐 SECURE LIVE STREAM - One-Time Verification Key
+         *  - Click on any key to copy it
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
-         *  - After verification, player is shown
+         *  - Shows lecture duration
          * ================================================================
          */
 
@@ -435,19 +584,18 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        // ⭐⭐⭐ CHANGE THESE KEYS AS YOU WANT ⭐⭐⭐
-        // आप चाहें तो इनमें से किसी भी key को use कर सकते हैं
-        const VALID_KEYS = [
-            '12345678',
-            '87654321',
-            '11112222',
-            '99998888',
-            'LIVE2024',
-            'STREAM01'
-        ];
-
-        // Video URL - अपना REAL .m3u8 लिंक डालें
+        const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
+
+        // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
+        const VALID_KEYS = [
+            'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
+            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
+            'D7A4F2G9', 'M8P3N6C2', 'V5B9T1E7', 'S4W7R8K2', 'J3H6L9N1',
+            'P8Q2M5T7', 'C6V9B4N2', 'F3R8K7W5', 'L9N2M6P4', 'G5T1E8S7',
+            'B7R4M9K2', 'X8W5P3N1', 'Q2T6V9C4', 'H5J8F3L7', 'Z6M2N9P4',
+            'R8W3Q7T5', 'Y4U9I2O7', 'L3K8J6H4', 'F9G7H3J5', 'P5N6M8C2'
+        ];
 
         // ============================================================
         // 📦 DOM REFS
@@ -456,10 +604,75 @@
         const playerPage = document.getElementById('playerPage');
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
+        const keyGrid = document.getElementById('keyGrid');
+        const toast = document.getElementById('toastMessage');
 
         const statusText = document.getElementById('statusText');
         const playerInfo = document.getElementById('playerInfo');
         const messageEl = document.getElementById('message');
+        const classNameText = document.getElementById('classNameText');
+        const durationDisplay = document.getElementById('durationDisplay');
+
+        // ============================================================
+        // 🏷️ SET CLASS NAME
+        // ============================================================
+        classNameText.textContent = Determinant 4;
+
+        // ============================================================
+        // 🔑 RENDER KEYS WITH CLICK-TO-COPY
+        // ============================================================
+        function renderKeys() {
+            keyGrid.innerHTML = '';
+            VALID_KEYS.forEach(key => {
+                const el = document.createElement('div');
+                el.className = 'key-item';
+                el.textContent = key;
+                el.title = 'Click to copy';
+                el.addEventListener('click', function() {
+                    copyKey(key, el);
+                });
+                keyGrid.appendChild(el);
+            });
+        }
+
+        // ============================================================
+        // 📋 COPY KEY FUNCTION
+        // ============================================================
+        function copyKey(key, element) {
+            navigator.clipboard.writeText(key).then(() => {
+                element.classList.add('copied');
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                }, 800);
+                showToast(`✅ Copied: ${key}`);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = key;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                element.classList.add('copied');
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                }, 800);
+                showToast(`✅ Copied: ${key}`);
+            });
+        }
+
+        // ============================================================
+        // 🔔 TOAST NOTIFICATION
+        // ============================================================
+        let toastTimer = null;
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
 
         // ============================================================
         // 🔐 VERIFICATION LOGIC
@@ -468,21 +681,18 @@
         function verifyKey() {
             const enteredKey = keyInput.value.trim();
 
-            // Check if key is empty
             if (!enteredKey) {
                 verifyMessage.textContent = '❌ Please enter an access key!';
                 verifyMessage.className = 'verify-error';
                 return;
             }
 
-            // Check if key length is 8 characters (you can change this)
             if (enteredKey.length !== 8) {
                 verifyMessage.textContent = '❌ Key must be exactly 8 characters!';
                 verifyMessage.className = 'verify-error';
                 return;
             }
 
-            // Check if key has already been used
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             if (usedKeys.includes(enteredKey)) {
                 verifyMessage.textContent = '❌ This key has already been used!';
@@ -490,29 +700,21 @@
                 return;
             }
 
-            // Check if key is valid
             if (VALID_KEYS.includes(enteredKey)) {
-                // ✅ Key is valid and unused
-                // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
 
-                // ✅ Success - Show player
                 verifyMessage.textContent = '✅ Access granted! Loading stream...';
                 verifyMessage.className = 'verify-success';
 
-                // Hide verification, show player
                 setTimeout(() => {
                     verificationPage.classList.add('hidden');
                     playerPage.classList.remove('hidden');
-                    // Initialize player
                     initPlayer();
-                    // Auto start stream
                     setTimeout(() => loadLiveStream(), 500);
                 }, 800);
 
             } else {
-                // ❌ Invalid key
                 verifyMessage.textContent = '❌ Invalid access key! Please try again.';
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
@@ -521,7 +723,7 @@
         }
 
         // ============================================================
-        // ⌨️ Enter Key Support on Input
+        // ⌨️ Enter Key Support
         // ============================================================
         keyInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -564,7 +766,7 @@
             player.ready(function() {
                 console.log('✅ Player Ready');
                 statusText.textContent = '✅ तैयार';
-                playerInfo.textContent = 'Live Player';
+                playerInfo.textContent = 'Video.js + hls.js';
                 showMessage('✅ प्लेयर तैयार है', 'success');
             });
 
@@ -585,6 +787,29 @@
                 hideMessage();
             });
 
+            // ============================================================
+            // 🔥 DURATION UPDATE - Lecture Time
+            // ============================================================
+            player.on('timeupdate', function() {
+                const currentTime = player.currentTime();
+                if (currentTime && !isNaN(currentTime)) {
+                    const minutes = Math.floor(currentTime / 60);
+                    const seconds = Math.floor(currentTime % 60);
+                    durationDisplay.textContent = 
+                        String(minutes).padStart(2, '0') + ':' + 
+                        String(seconds).padStart(2, '0');
+                }
+            });
+
+            // When video ends or is reset
+            player.on('ended', function() {
+                durationDisplay.textContent = '00:00';
+            });
+
+            player.on('loadstart', function() {
+                durationDisplay.textContent = '00:00';
+            });
+
             return player;
         }
 
@@ -594,6 +819,7 @@
         function loadLiveStream() {
             showMessage('⏳ लाइव स्ट्रीम लोड हो रहा है...', 'info');
             statusText.textContent = '⏳ लोड हो रहा है...';
+            durationDisplay.textContent = '00:00';
 
             if (!player) {
                 player = initPlayer();
@@ -611,21 +837,6 @@
             } catch (error) {
                 console.error('❌ Load error:', error);
                 showMessage('❌ ' + error.message, 'error');
-            }
-        }
-
-        // ============================================================
-        // 🔄 RESET PLAYER
-        // ============================================================
-        function resetPlayer() {
-            if (player) {
-                player.pause();
-                player.reset();
-                player.src({ src: '', type: '' });
-                statusText.textContent = 'तैयार';
-                playerInfo.textContent = 'Video.js + hls.js';
-                hideMessage();
-                showMessage('🔄 प्लेयर रीसेट हो गया', 'info');
             }
         }
 
@@ -652,11 +863,14 @@
         // 🚀 PAGE LOAD
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
+            renderKeys();
             console.log('✅ Secure Live Stream initialized!');
-            console.log('🔑 Valid Keys:', VALID_KEYS);
+            console.log('📚 Class Name:', CLASS_NAME);
+            console.log('🔑 Total Keys:', VALID_KEYS.length);
             console.log('📺 Video URL:', VIDEO_URL);
             console.log('🔒 Referer: REMOVED');
-            console.log('💡 Each key can be used only once');
+            console.log('💡 Click any key to copy');
+            console.log('⏱️ Duration tracking enabled');
         });
 
         // ============================================================
