@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HLS Video Player - Embeddable</title>
+    <title>HLS Video Player - Live</title>
     <!-- ============================================================ -->
     <!-- VIDEO.JS + HLS.JS - From the GitHub repo -->
     <!-- ============================================================ -->
@@ -14,7 +14,7 @@
 
     <style>
         /* ================================================================
-           CSS - Dark Theme (as in the GitHub repo style)
+           CSS - Dark Theme
            ================================================================ */
         * {
             margin: 0;
@@ -108,12 +108,15 @@
             display: block;
         }
 
-        /* ----- Controls Bar (GitHub repo style) ----- */
+        /* ================================================================
+           🔥 CONTROLS BAR - ONLY LIVE BUTTON (Search Bar Hidden)
+           ================================================================ */
         .controls-bar {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             align-items: center;
+            justify-content: center;
             background: #12121e;
             padding: 14px 18px;
             border-radius: 10px;
@@ -121,66 +124,64 @@
             margin-bottom: 16px;
         }
 
-        .controls-bar .url-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #a0a0b8;
-        }
-
+        /* 🔥 SEARCH BAR HIDDEN */
+        .controls-bar .url-label,
         .controls-bar .url-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            border: 1px solid #2a2a4e;
-            background: #0f0f23;
-            color: #fff;
-            font-size: 14px;
-            font-family: 'Segoe UI', sans-serif;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .controls-bar .url-input:focus {
-            border-color: #f7971e;
-        }
-
-        .controls-bar .url-input::placeholder {
-            color: #6a6a8a;
+            display: none;
         }
 
         .btn {
-            padding: 10px 28px;
+            padding: 12px 36px;
             border: none;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            white-space: nowrap;
+            gap: 10px;
             font-family: 'Segoe UI', sans-serif;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #0a0a12;
+        .btn-live {
+            background: linear-gradient(135deg, #ff0044, #cc0033);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.4);
         }
 
-        .btn-primary:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        .btn-live:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.6);
         }
 
-        .btn-outline {
-            background: transparent;
+        .btn-live:active {
+            transform: scale(0.95);
+        }
+
+        .btn-live .pulse-ring {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .btn-refresh {
+            background: #0f0f23;
             border: 1px solid #2a2a4e;
             color: #a0a0b8;
+            padding: 12px 20px;
         }
 
-        .btn-outline:hover {
+        .btn-refresh:hover {
             border-color: #f7971e;
             color: #fff;
         }
@@ -281,9 +282,8 @@
         /* ----- Responsive ----- */
         @media (max-width: 768px) {
             .container { padding: 16px; }
-            .controls-bar { flex-direction: column; align-items: stretch; }
-            .controls-bar .url-input { min-width: 100%; }
-            .btn { justify-content: center; }
+            .controls-bar { flex-direction: column; }
+            .btn { justify-content: center; width: 100%; }
             .status-bar { flex-direction: column; align-items: flex-start; }
         }
     </style>
@@ -294,7 +294,7 @@
 
         <!-- ===== HEADER ===== -->
         <div class="header">
-            <h1>📺 HLS Video Player</h1>
+            <h1>📺 Live Stream</h1>
             <div class="live-badge">लाइव</div>
         </div>
 
@@ -308,17 +308,17 @@
             </video>
         </div>
 
-        <!-- ===== CONTROLS BAR (As per GitHub repo) ===== -->
+        <!-- ============================================================
+             🔥 CONTROLS BAR - ONLY LIVE BUTTON (Search Bar Hidden)
+             ============================================================ -->
         <div class="controls-bar">
-            <span class="url-label"><i class="fas fa-link"></i> Video URL</span>
-            <input type="text" class="url-input" id="videoUrlInput"
-                   placeholder="https://example.com/stream.m3u8"
-                   value="https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8">
-            <button class="btn btn-primary" onclick="loadVideo()">
-                <i class="fas fa-play"></i> Play
+            <!-- Search bar is HIDDEN via CSS (display: none) -->
+            <button class="btn btn-live" onclick="loadLiveStream()">
+                <span class="pulse-ring"></span>
+                लाइव देखें
             </button>
-            <button class="btn btn-outline" onclick="resetPlayer()">
-                <i class="fas fa-undo-alt"></i> Reset
+            <button class="btn btn-refresh" onclick="resetPlayer()">
+                <i class="fas fa-sync-alt"></i> रिफ्रेश
             </button>
         </div>
 
@@ -356,22 +356,26 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT - As per GitHub repo structure -->
+    <!-- JAVASCRIPT -->
     <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
-         *  🎬 Embeddable HLS Video Player
-         *  From: https://github.com/avinashkranjan/HLS_VideoPlayer
-         *  - Video.js + hls.js
-         *  - Query param support: ?video=URL&subtitle=URL
+         *  🎬 HLS Video Player - Live Only
+         *  - Search bar hidden (CSS)
+         *  - Fixed video URL (change below)
+         *  - "लाइव देखें" button loads the stream
          * ================================================================
          */
 
         // ============================================================
+        // 🔴 FIXED VIDEO URL (Change this to your .m3u8 link)
+        // ============================================================
+        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
+
+        // ============================================================
         // 📦 DOM REFS
         // ============================================================
-        const videoUrlInput = document.getElementById('videoUrlInput');
         const statusText = document.getElementById('statusText');
         const viewerCountEl = document.getElementById('viewerCount');
         const playerInfo = document.getElementById('playerInfo');
@@ -404,7 +408,7 @@
 
             // --- Player Events ---
             player.ready(function() {
-                console.log('✅ Video.js Player Ready');
+                console.log('✅ Player Ready');
                 statusText.textContent = '✅ तैयार';
                 playerInfo.textContent = 'Video.js + hls.js';
                 showMessage('✅ प्लेयर तैयार है', 'success');
@@ -431,34 +435,25 @@
         }
 
         // ============================================================
-        // 🎬 LOAD VIDEO - As per GitHub repo pattern
+        // 🎬 LOAD LIVE STREAM
         // ============================================================
-        function loadVideo() {
-            const videoUrl = videoUrlInput.value.trim();
-            if (!videoUrl) {
-                showMessage('❌ कृपया एक वैध .m3u8 लिंक डालें!', 'error');
-                return;
-            }
-
-            showMessage('⏳ वीडियो लोड हो रहा है...', 'info');
+        function loadLiveStream() {
+            showMessage('⏳ लाइव स्ट्रीम लोड हो रहा है...', 'info');
             statusText.textContent = '⏳ लोड हो रहा है...';
-
-            // Save to localStorage (like repo's query param feature)
-            localStorage.setItem('savedVideoUrl', videoUrl);
 
             if (!player) {
                 player = initPlayer();
             }
 
-            // Load the HLS stream
             try {
                 player.src({
-                    src: videoUrl,
+                    src: VIDEO_URL,
                     type: 'application/x-mpegURL'
                 });
                 player.play().catch(() => {
                     showMessage('⚠️ ऑटोप्ले ब्लॉक, प्ले बटन दबाएँ', 'info');
                 });
+                showMessage('✅ लाइव स्ट्रीम शुरू!', 'success');
             } catch (error) {
                 console.error('❌ Load error:', error);
                 showMessage('❌ ' + error.message, 'error');
@@ -516,46 +511,14 @@
         startViewerCounter();
 
         // ============================================================
-        // ⌨️ ENTER KEY SUPPORT
-        // ============================================================
-        videoUrlInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                loadVideo();
-            }
-        });
-
-        // ============================================================
-        // 🚀 PAGE LOAD - Check for query params (GitHub repo feature)
+        // 🚀 PAGE LOAD - Auto start live stream
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize player
             player = initPlayer();
-
-            // Check URL query parameters (as in the GitHub repo)
-            const urlParams = new URLSearchParams(window.location.search);
-            const videoParam = urlParams.get('video');
-            const subtitleParam = urlParams.get('subtitle');
-
-            if (videoParam) {
-                videoUrlInput.value = videoParam;
-                loadVideo();
-                if (subtitleParam) {
-                    console.log('📝 Subtitle URL:', subtitleParam);
-                    // Add subtitle track if needed
-                    // player.addRemoteTextTrack({ src: subtitleParam, kind: 'subtitles' });
-                }
-            } else {
-                // Check localStorage
-                const savedUrl = localStorage.getItem('savedVideoUrl');
-                if (savedUrl && savedUrl !== "null" && savedUrl !== "") {
-                    videoUrlInput.value = savedUrl;
-                    loadVideo();
-                }
-            }
-
-            console.log('✅ HLS Video Player initialized!');
-            console.log('📺 Repo: https://github.com/avinashkranjan/HLS_VideoPlayer');
-            console.log('💡 Use ?video=URL&subtitle=URL in query params');
+            // Auto start live stream
+            loadLiveStream();
+            console.log('✅ Live Player initialized!');
+            console.log('📺 Video URL:', VIDEO_URL);
         });
 
         // ============================================================
@@ -569,15 +532,12 @@
                     const vhs = tech.vhs;
                     if (vhs && vhs.buffer && vhs.buffer.length === 0 && !player.paused()) {
                         console.log('🔄 Buffer empty, reloading...');
-                        const src = localStorage.getItem('savedVideoUrl') || videoUrlInput.value;
-                        if (src) {
-                            player.src({ src: src, type: 'application/x-mpegURL' });
-                            player.play().catch(() => {});
-                        }
+                        player.src({ src: VIDEO_URL, type: 'application/x-mpegURL' });
+                        player.play().catch(() => {});
                     }
                 }
             } catch (e) {
-                // Ignore errors
+                // Ignore
             }
         }, 5000);
     </script>
