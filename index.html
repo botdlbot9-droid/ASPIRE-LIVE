@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream - Verification</title>
+    <title>Live Stream - One-Time Key</title>
     <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet">
     <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
@@ -32,7 +32,7 @@
         .container {
             max-width: 1100px;
             width: 100%;
-            background: rgba(26, 26, 46, 0.9);
+            background: rgba(26, 26, 46, 0.85);
             backdrop-filter: blur(20px);
             border-radius: 24px;
             padding: 30px;
@@ -138,60 +138,6 @@
             min-height: 20px;
         }
 
-        /* ===== KEY LIST ===== */
-        .key-list-container {
-            margin-top: 30px;
-            padding: 20px;
-            background: #12121e;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-        }
-
-        .key-list-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #a0a0b8;
-            margin-bottom: 15px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .key-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .key-item {
-            background: #0f0f23;
-            border: 1px solid #2a2a4e;
-            border-radius: 8px;
-            padding: 10px 8px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #f7971e;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .key-item:hover {
-            background: #1a1a3e;
-            border-color: #f7971e;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
-        }
-
-        .key-item.copied {
-            background: #00ff88;
-            color: #0a0a12;
-            border-color: #00ff88;
-        }
-
-        /* ===== TOAST ===== */
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -287,16 +233,17 @@
             justify-content: center;
             align-items: center;
             gap: 15px;
-            padding: 12px 20px;
-            background: #12121e;
+            padding: 14px 20px;
+            background: rgba(18, 18, 30, 0.6);
             border-radius: 12px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
-            font-size: 14px;
+            backdrop-filter: blur(10px);
         }
 
         .timer-bar .label {
             color: #a0a0b8;
+            font-size: 14px;
         }
 
         .timer-bar .value {
@@ -305,13 +252,14 @@
             font-family: 'Courier New', monospace;
             font-size: 28px;
             letter-spacing: 3px;
-            min-width: 100px;
+            min-width: 120px;
             text-align: center;
         }
 
         .timer-bar .timer-icon {
             color: #ff0044;
             animation: pulse 1.5s infinite;
+            font-size: 20px;
         }
 
         .timer-bar.warning .value {
@@ -343,11 +291,12 @@
             gap: 12px;
             align-items: center;
             justify-content: center;
-            background: #12121e;
+            background: rgba(18, 18, 30, 0.6);
             padding: 14px 18px;
             border-radius: 12px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
+            backdrop-filter: blur(10px);
         }
 
         .btn {
@@ -397,15 +346,16 @@
             align-items: center;
             gap: 12px;
             padding: 10px 16px;
-            background: #12121e;
+            background: rgba(18, 18, 30, 0.6);
             border-radius: 12px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
-            font-size: 14px;
+            backdrop-filter: blur(10px);
         }
 
         .duration-bar .label {
             color: #a0a0b8;
+            font-size: 14px;
         }
 
         .duration-bar .value {
@@ -431,10 +381,11 @@
             flex-wrap: wrap;
             gap: 12px;
             padding: 12px 16px;
-            background: #12121e;
+            background: rgba(18, 18, 30, 0.6);
             border-radius: 12px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
+            backdrop-filter: blur(10px);
         }
 
         .status-item {
@@ -507,12 +458,13 @@
             align-items: center;
             gap: 10px;
             padding: 8px 16px;
-            background: #0f0f23;
+            background: rgba(15, 15, 35, 0.6);
             border-radius: 8px;
             border: 1px solid #2a2a4e;
             margin-bottom: 12px;
             font-size: 12px;
             color: #a0a0b8;
+            backdrop-filter: blur(10px);
         }
 
         .remote-status .dot {
@@ -530,6 +482,7 @@
             background: #ff6b6b;
         }
 
+        /* ===== MESSAGE ===== */
         .message {
             font-size: 14px;
             padding: 10px 16px;
@@ -576,9 +529,8 @@
         @media (max-width: 768px) {
             .container { padding: 16px; }
             .header { flex-direction: column; align-items: flex-start; }
-            .timer-bar .value { font-size: 20px; }
-            .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-            .key-item { font-size: 14px; padding: 8px 6px; }
+            .timer-bar .value { font-size: 20px; min-width: 90px; }
+            .timer-bar { flex-wrap: wrap; }
             .btn { width: 100%; justify-content: center; }
             .controls-bar { flex-direction: column; }
             .status-bar { flex-direction: column; align-items: flex-start; }
@@ -589,18 +541,14 @@
 </head>
 <body>
 
-    <!-- ========================================================== -->
-    <!-- 📺 BLANK OVERLAY -->
-    <!-- ========================================================== -->
+    <!-- ===== BLANK OVERLAY ===== -->
     <div id="blankOverlay">
         <div class="blank-icon">📺</div>
         <div class="blank-title">Stream is Paused</div>
         <div class="blank-subtitle">The live stream has been paused by the admin</div>
     </div>
 
-    <!-- ========================================================== -->
-    <!-- 🔐 MAIN APP -->
-    <!-- ========================================================== -->
+    <!-- ===== MAIN APP ===== -->
     <div class="container" id="appContainer">
 
         <!-- ===== VERIFICATION PAGE ===== -->
@@ -615,11 +563,6 @@
             </form>
 
             <div id="verifyMessage" class="verify-error"></div>
-
-            <div class="key-list-container">
-                <div class="key-list-title">📋 Click any key to copy</div>
-                <div class="key-grid" id="keyGrid"></div>
-            </div>
         </div>
 
         <!-- ===== PLAYER PAGE ===== -->
@@ -694,22 +637,19 @@
 
     </div>
 
-    <!-- ============================================================ -->
-    <!-- TOAST MESSAGE -->
-    <!-- ============================================================ -->
+    <!-- ===== TOAST ===== -->
     <div id="toastMessage" class="toast-message">✅ Copied!</div>
 
-    <!-- ============================================================ -->
-    <!-- JAVASCRIPT -->
-    <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
-         *  🔐 SECURE LIVE STREAM - One-Time Key + 2 Hour Timer + Remote Control
-         *  - Click any key to copy
-         *  - One-time use keys (stored in localStorage)
+         *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
+         *  - Keys hidden from users (only admin knows)
+         *  - ONE-TIME USE: Keys cannot be reused
+         *  - Admin can generate new keys from admin panel
+         *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
-         *  - Cross-device remote control via Cloudflare D1
+         *  - Cross-device remote control
          * ================================================================
          */
 
@@ -717,27 +657,30 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        const CLASS_NAME = "ClassPlus Live";
-        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
+        let CLASS_NAME = "ClassPlus Live";
+        let VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // ⭐⭐⭐ YOUR CLOUDFLARE WORKER URL ⭐⭐⭐
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
-
-        // ⭐⭐⭐ TIMER DURATION - 2 HOURS (7200 seconds) ⭐⭐⭐
         const TIMER_DURATION = 7200;
+        const REMOTE_CHECK_INTERVAL = 3000;
 
-        // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
-        const VALID_KEYS = [
-            'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
-            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
-            'D7A4F2G9', 'M8P3N6C2', 'V5B9T1E7', 'S4W7R8K2', 'J3H6L9N1',
-            'P8Q2M5T7', 'C6V9B4N2', 'F3R8K7W5', 'L9N2M6P4', 'G5T1E8S7',
-            'B7R4M9K2', 'X8W5P3N1', 'Q2T6V9C4', 'H5J8F3L7', 'Z6M2N9P4',
-            'R8W3Q7T5', 'Y4U9I2O7', 'L3K8J6H4', 'F9G7H3J5', 'P5N6M8C2'
+        // ⭐⭐⭐ LOAD KEYS FROM ADMIN PANEL ⭐⭐⭐
+        let VALID_KEYS = ['K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
+            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
         ];
 
-        // ⭐⭐⭐ REMOTE CHECK INTERVAL (milliseconds) ⭐⭐⭐
-        const REMOTE_CHECK_INTERVAL = 3000;
+        // Load keys from localStorage (admin panel saves here)
+        function loadKeysFromStorage() {
+            const savedKeys = localStorage.getItem('validKeys');
+            if (savedKeys) {
+                try {
+                    const parsed = JSON.parse(savedKeys);
+                    if (Array.isArray(parsed) && parsed.length === 10) {
+                        VALID_KEYS = parsed;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
 
         // ============================================================
         // 📦 DOM REFS
@@ -747,7 +690,6 @@
         const blankOverlay = document.getElementById('blankOverlay');
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
-        const keyGrid = document.getElementById('keyGrid');
         const toast = document.getElementById('toastMessage');
         const verifyForm = document.getElementById('verifyForm');
 
@@ -761,63 +703,68 @@
         const statusDot = document.getElementById('statusDot');
         const statusTextRemote = document.getElementById('statusTextRemote');
 
-        // ============================================================
-        // ⏱️ TIMER STATE
-        // ============================================================
         let timerInterval = null;
         let timeRemaining = TIMER_DURATION;
         let isTimerRunning = false;
         let sessionKey = null;
 
         // ============================================================
-        // 🏷️ SET CLASS NAME
+        // 🏷️ LOAD ADMIN CONFIG FROM DB
         // ============================================================
-        classNameText.textContent = CLASS_NAME;
 
-        // ============================================================
-        // 🔑 RENDER KEYS
-        // ============================================================
-        function renderKeys() {
-            keyGrid.innerHTML = '';
-            VALID_KEYS.forEach(key => {
-                const el = document.createElement('div');
-                el.className = 'key-item';
-                el.textContent = key;
-                el.title = 'Click to copy';
-                el.addEventListener('click', function() {
-                    copyKey(key, el);
-                });
-                keyGrid.appendChild(el);
-            });
+        async function loadAdminConfig() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-config`);
+                if (!response.ok) throw new Error('Failed to fetch config');
+                const data = await response.json();
+
+                if (data.className) {
+                    CLASS_NAME = data.className;
+                    classNameText.textContent = CLASS_NAME;
+                }
+                if (data.streamUrl) {
+                    VIDEO_URL = data.streamUrl;
+                }
+                console.log('📺 Class Name:', CLASS_NAME);
+                console.log('🔗 Stream URL:', VIDEO_URL);
+            } catch (error) {
+                console.error('❌ Failed to load config from DB:', error);
+                // Fallback to localStorage
+                const savedClassName = localStorage.getItem('adminClassName');
+                const savedStreamUrl = localStorage.getItem('adminStreamUrl');
+
+                if (savedClassName) {
+                    CLASS_NAME = savedClassName;
+                    classNameText.textContent = CLASS_NAME;
+                }
+                if (savedStreamUrl) {
+                    VIDEO_URL = savedStreamUrl;
+                }
+            }
         }
 
         // ============================================================
-        // 📋 COPY KEY FUNCTION
+        // 🔄 CHECK FOR REFRESH SIGNAL FROM DB
         // ============================================================
-        function copyKey(key, element) {
-            navigator.clipboard.writeText(key).then(() => {
-                element.classList.add('copied');
-                setTimeout(() => {
-                    element.classList.remove('copied');
-                }, 800);
-                showToast(`✅ Copied: ${key}`);
-            }).catch(() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = key;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                element.classList.add('copied');
-                setTimeout(() => {
-                    element.classList.remove('copied');
-                }, 800);
-                showToast(`✅ Copied: ${key}`);
-            });
+
+        async function checkRefreshSignal() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-refresh`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.refresh === true) {
+                    console.log('🔄 Refresh signal received! Reloading page to get latest config...');
+                    // Reload the page to get latest config
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('❌ Refresh check error:', error);
+            }
         }
 
         // ============================================================
-        // 🔔 TOAST NOTIFICATION
+        // 🔔 TOAST
         // ============================================================
         let toastTimer = null;
 
@@ -825,13 +772,11 @@
             toast.textContent = message;
             toast.classList.add('show');
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2000);
         }
 
         // ============================================================
-        // 🔐 VERIFICATION LOGIC
+        // 🔐 VERIFICATION - ONE-TIME USE FIXED
         // ============================================================
 
         function verifyKey() {
@@ -849,14 +794,22 @@
                 return;
             }
 
+            // Load fresh keys from storage (in case admin regenerated)
+            loadKeysFromStorage();
+
+            // Check if key has already been used
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             if (usedKeys.includes(enteredKey)) {
                 verifyMessage.textContent = '❌ This key has already been used!';
                 verifyMessage.className = 'verify-error';
+                keyInput.value = '';
+                keyInput.focus();
                 return;
             }
 
+            // Check if key is valid
             if (VALID_KEYS.includes(enteredKey)) {
+                // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
 
@@ -901,7 +854,7 @@
         });
 
         // ============================================================
-        // 🔄 REMOTE CONTROL - Cloudflare D1
+        // 🔄 REMOTE CONTROL
         // ============================================================
 
         async function checkRemoteStatus() {
@@ -1089,7 +1042,6 @@
                     const hours = Math.floor(currentTime / 3600);
                     const minutes = Math.floor((currentTime % 3600) / 60);
                     const seconds = Math.floor(currentTime % 60);
-
                     durationDisplay.textContent =
                         String(hours).padStart(2, '0') + ':' +
                         String(minutes).padStart(2, '0') + ':' +
@@ -1158,47 +1110,56 @@
         // 🚀 PAGE LOAD
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            renderKeys();
+            loadKeysFromStorage();
 
-            // Start remote polling every 3 seconds
+            // Load config from DB first
+            loadAdminConfig().then(() => {
+                // If user has active session, restart stream with new config
+                const savedKey = localStorage.getItem('sessionKey');
+                const savedTimer = localStorage.getItem('timerRemaining');
+                const savedStartTime = localStorage.getItem('timerStartTime');
+
+                if (savedKey && savedTimer && savedStartTime) {
+                    const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                    const remaining = parseInt(savedTimer) - elapsed;
+
+                    if (remaining > 0) {
+                        sessionKey = savedKey;
+                        timeRemaining = remaining;
+                        verificationPage.classList.add('hidden');
+                        playerPage.classList.remove('hidden');
+                        initPlayer();
+                        setTimeout(() => {
+                            loadLiveStream();
+                            startTimer();
+                        }, 500);
+                        console.log('✅ Session restored! Time remaining:', timeRemaining);
+                        return;
+                    } else {
+                        localStorage.removeItem('timerRemaining');
+                        localStorage.removeItem('timerStartTime');
+                        localStorage.removeItem('sessionKey');
+                    }
+                }
+            });
+
+            // Start remote polling
             setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
 
-            const savedKey = localStorage.getItem('sessionKey');
-            const savedTimer = localStorage.getItem('timerRemaining');
-            const savedStartTime = localStorage.getItem('timerStartTime');
-
-            if (savedKey && savedTimer && savedStartTime) {
-                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-                const remaining = parseInt(savedTimer) - elapsed;
-
-                if (remaining > 0) {
-                    sessionKey = savedKey;
-                    timeRemaining = remaining;
-                    verificationPage.classList.add('hidden');
-                    playerPage.classList.remove('hidden');
-                    initPlayer();
-                    setTimeout(() => {
-                        loadLiveStream();
-                        startTimer();
-                    }, 500);
-                    console.log('✅ Session restored! Time remaining:', timeRemaining);
-                    return;
-                } else {
-                    localStorage.removeItem('timerRemaining');
-                    localStorage.removeItem('timerStartTime');
-                    localStorage.removeItem('sessionKey');
-                }
-            }
+            // 🔥 START REFRESH SIGNAL CHECK - Every 5 seconds
+            setInterval(checkRefreshSignal, 5000);
 
             console.log('✅ Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
             console.log('⏱️ Timer: 2 Hours');
             console.log('📡 Remote Control: Active');
+            console.log('🔄 Auto-refresh: Active (checks every 5 seconds)');
+            console.log('🔒 One-time use key system is ACTIVE');
         });
 
         // ============================================================
-        // 🔄 AUTO-RETRY - Stalled Recovery
+        // 🔄 AUTO-RETRY
         // ============================================================
         setInterval(function() {
             if (!player) return;
