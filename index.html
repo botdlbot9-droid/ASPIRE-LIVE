@@ -47,7 +47,7 @@
         /* ===== VERIFICATION PAGE ===== */
         #verificationPage {
             max-width: 500px;
-            margin: 60px auto;
+            margin: 40px auto;
             text-align: center;
         }
 
@@ -138,6 +138,59 @@
             min-height: 20px;
         }
 
+        /* ================================================================
+           🔥 CONTACT ADMIN BUTTONS - Both on Verification & Player Page
+           ================================================================ */
+        .contact-admin {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .contact-btn.telegram-1 {
+            background: linear-gradient(135deg, #0088cc, #005f99);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.3);
+        }
+
+        .contact-btn.telegram-1:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 136, 204, 0.5);
+        }
+
+        .contact-btn.telegram-2 {
+            background: linear-gradient(135deg, #2aabee, #0077b6);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(42, 171, 238, 0.3);
+        }
+
+        .contact-btn.telegram-2:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(42, 171, 238, 0.5);
+        }
+
+        .contact-btn i {
+            font-size: 18px;
+        }
+
+        /* ===== TOAST ===== */
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -526,6 +579,7 @@
             color: #f7971e;
         }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .container { padding: 16px; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -536,6 +590,8 @@
             .status-bar { flex-direction: column; align-items: flex-start; }
             .verify-title { font-size: 24px; }
             #blankOverlay .blank-title { font-size: 24px; }
+            .contact-admin { flex-direction: column; align-items: center; }
+            .contact-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -563,6 +619,16 @@
             </form>
 
             <div id="verifyMessage" class="verify-error"></div>
+
+            <!-- 🔥 CONTACT ADMIN BUTTONS - On Verification Page -->
+            <div class="contact-admin">
+                <a href="https://t.me/G6803" target="_blank" class="contact-btn telegram-1">
+                    <i class="fab fa-telegram-plane"></i> Contact Admin 1
+                </a>
+                <a href="https://t.me/SH6803" target="_blank" class="contact-btn telegram-2">
+                    <i class="fab fa-telegram-plane"></i> Contact Admin 2
+                </a>
+            </div>
         </div>
 
         <!-- ===== PLAYER PAGE ===== -->
@@ -630,6 +696,16 @@
 
             <div id="message" class="message"></div>
 
+            <!-- 🔥 CONTACT ADMIN BUTTONS - On Player Page -->
+            <div class="contact-admin">
+                <a href="https://t.me/G6803" target="_blank" class="contact-btn telegram-1">
+                    <i class="fab fa-telegram-plane"></i> Contact Admin 1
+                </a>
+                <a href="https://t.me/SH6803" target="_blank" class="contact-btn telegram-2">
+                    <i class="fab fa-telegram-plane"></i> Contact Admin 2
+                </a>
+            </div>
+
             <footer class="footer">
                 <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access · 2 Hour Session</p>
             </footer>
@@ -640,16 +716,19 @@
     <!-- ===== TOAST ===== -->
     <div id="toastMessage" class="toast-message">✅ Copied!</div>
 
+    <!-- ===== Font Awesome for Icons ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <script>
         /**
          * ================================================================
          *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
-         *  - Keys hidden from users (only admin knows)
+         *  - Keys loaded from Cloudflare D1 database
          *  - ONE-TIME USE: Keys cannot be reused
-         *  - Admin can generate new keys from admin panel
+         *  - Admin can generate and sync new keys
          *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
-         *  - Cross-device remote control
+         *  - Contact Admin buttons on both pages
          * ================================================================
          */
 
@@ -664,23 +743,8 @@
         const TIMER_DURATION = 7200;
         const REMOTE_CHECK_INTERVAL = 3000;
 
-        // ⭐⭐⭐ LOAD KEYS FROM ADMIN PANEL ⭐⭐⭐
-        let VALID_KEYS = ['K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
-            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
-        ];
-
-        // Load keys from localStorage (admin panel saves here)
-        function loadKeysFromStorage() {
-            const savedKeys = localStorage.getItem('validKeys');
-            if (savedKeys) {
-                try {
-                    const parsed = JSON.parse(savedKeys);
-                    if (Array.isArray(parsed) && parsed.length === 10) {
-                        VALID_KEYS = parsed;
-                    }
-                } catch (e) { /* ignore */ }
-            }
-        }
+        // ⭐⭐⭐ KEYS LOADED FROM DATABASE ⭐⭐⭐
+        let VALID_KEYS = [];
 
         // ============================================================
         // 📦 DOM REFS
@@ -707,6 +771,31 @@
         let timeRemaining = TIMER_DURATION;
         let isTimerRunning = false;
         let sessionKey = null;
+
+        // ============================================================
+        // 🔑 LOAD KEYS FROM DATABASE
+        // ============================================================
+
+        async function loadKeysFromDB() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-keys`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.keys && data.keys.length === 10) {
+                    VALID_KEYS = data.keys;
+                    localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
+                    console.log('✅ Keys loaded from database:', VALID_KEYS);
+                    return true;
+                } else {
+                    console.warn('⚠️ No valid keys found in database, using fallback');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Failed to load keys from DB:', error);
+                return false;
+            }
+        }
 
         // ============================================================
         // 🏷️ LOAD ADMIN CONFIG FROM DB
@@ -754,8 +843,7 @@
                 const data = await response.json();
 
                 if (data.refresh === true) {
-                    console.log('🔄 Refresh signal received! Reloading page to get latest config...');
-                    // Reload the page to get latest config
+                    console.log('🔄 Refresh signal received! Reloading page...');
                     window.location.reload();
                 }
             } catch (error) {
@@ -764,19 +852,7 @@
         }
 
         // ============================================================
-        // 🔔 TOAST
-        // ============================================================
-        let toastTimer = null;
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2000);
-        }
-
-        // ============================================================
-        // 🔐 VERIFICATION - ONE-TIME USE FIXED
+        // 🔐 VERIFICATION - ONE-TIME USE
         // ============================================================
 
         function verifyKey() {
@@ -794,9 +870,6 @@
                 return;
             }
 
-            // Load fresh keys from storage (in case admin regenerated)
-            loadKeysFromStorage();
-
             // Check if key has already been used
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             if (usedKeys.includes(enteredKey)) {
@@ -812,6 +885,9 @@
                 // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
+
+                // Sync used keys to DB
+                syncUsedKeysToDB(usedKeys);
 
                 sessionKey = enteredKey;
                 localStorage.setItem('sessionKey', sessionKey);
@@ -835,6 +911,23 @@
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
+            }
+        }
+
+        // ============================================================
+        // 💾 SYNC USED KEYS TO DATABASE
+        // ============================================================
+
+        async function syncUsedKeysToDB(usedKeys) {
+            try {
+                await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usedKeys: usedKeys })
+                });
+                console.log('✅ Used keys synced to database');
+            } catch (error) {
+                console.error('❌ Failed to sync used keys:', error);
             }
         }
 
@@ -1109,53 +1202,55 @@
         // ============================================================
         // 🚀 PAGE LOAD
         // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            loadKeysFromStorage();
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load keys from database first
+            await loadKeysFromDB();
 
-            // Load config from DB first
-            loadAdminConfig().then(() => {
-                // If user has active session, restart stream with new config
-                const savedKey = localStorage.getItem('sessionKey');
-                const savedTimer = localStorage.getItem('timerRemaining');
-                const savedStartTime = localStorage.getItem('timerStartTime');
-
-                if (savedKey && savedTimer && savedStartTime) {
-                    const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-                    const remaining = parseInt(savedTimer) - elapsed;
-
-                    if (remaining > 0) {
-                        sessionKey = savedKey;
-                        timeRemaining = remaining;
-                        verificationPage.classList.add('hidden');
-                        playerPage.classList.remove('hidden');
-                        initPlayer();
-                        setTimeout(() => {
-                            loadLiveStream();
-                            startTimer();
-                        }, 500);
-                        console.log('✅ Session restored! Time remaining:', timeRemaining);
-                        return;
-                    } else {
-                        localStorage.removeItem('timerRemaining');
-                        localStorage.removeItem('timerStartTime');
-                        localStorage.removeItem('sessionKey');
-                    }
-                }
-            });
+            // Load config from DB
+            await loadAdminConfig();
 
             // Start remote polling
             setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
 
-            // 🔥 START REFRESH SIGNAL CHECK - Every 5 seconds
+            // Start refresh signal check
             setInterval(checkRefreshSignal, 5000);
+
+            // Check for saved session
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+
+            if (savedKey && savedTimer && savedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                const remaining = parseInt(savedTimer) - elapsed;
+
+                if (remaining > 0) {
+                    sessionKey = savedKey;
+                    timeRemaining = remaining;
+                    verificationPage.classList.add('hidden');
+                    playerPage.classList.remove('hidden');
+                    initPlayer();
+                    setTimeout(() => {
+                        loadLiveStream();
+                        startTimer();
+                    }, 500);
+                    console.log('✅ Session restored! Time remaining:', timeRemaining);
+                    return;
+                } else {
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                }
+            }
 
             console.log('✅ Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
             console.log('⏱️ Timer: 2 Hours');
             console.log('📡 Remote Control: Active');
-            console.log('🔄 Auto-refresh: Active (checks every 5 seconds)');
+            console.log('🔄 Auto-refresh: Active');
             console.log('🔒 One-time use key system is ACTIVE');
+            console.log('📱 Contact Admin buttons added on both pages');
         });
 
         // ============================================================
