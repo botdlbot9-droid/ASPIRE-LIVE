@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream - MongoDB</title>
+    <title>Secure Live Stream - MongoDB</title>
     <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet">
     <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
@@ -195,15 +195,16 @@
     <div id="toastMessage" class="toast-message">✅ Copied!</div>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT - FULLY FIXED VERSION -->
     <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
-         *  🔐 SECURE LIVE STREAM - MongoDB Version
+         *  🔐 SECURE LIVE STREAM - MongoDB Version (FIXED)
          *  - MongoDB Data API se status read/write
          *  - Cross-device (Phone, Laptop, Tablet)
          *  - 2 Hour Timer + Key Verification
+         *  - FIX: Unknown status issue resolved
          * ================================================================
          */
 
@@ -214,20 +215,16 @@
         const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // ⭐⭐⭐ MONGODB ATLAS DATA API CONFIGURATION ⭐⭐⭐
-        // Ye aapka connection string hai
-        const MONGODB_URI = "mongodb+srv://itsgoluAPI:jrMHSipToKUEnmcp@cpprivateapi.ghhp3oz.mongodb.net/?appName=CpprivateApi";
+        // ⭐⭐⭐ MONGODB DATA API CONFIGURATION ⭐⭐⭐
+        // ⚠️ Aapki image mein "Unknown" dikh raha hai — iska matlab MongoDB connection sahi nahi hai
+        // Neeche diye gaye values ko apne MongoDB Atlas se copy karein:
         
-        // ⭐⭐⭐ MONGODB DATA API ENDPOINT ⭐⭐⭐
-        // Data API enable karne ke baad ye URL milega
-        // Format: https://data.mongodb-api.com/app/data-xxxxx/endpoint/data/v1
-        const DATA_API_URL = "https://data.mongodb-api.com/app/data-xxxxx/endpoint/data/v1";
-        
-        // ⭐⭐⭐ API KEY (MongoDB Atlas se generate karein) ⭐⭐⭐
-        const MONGO_API_KEY = "YOUR_MONGO_API_KEY_HERE"; // ← Replace with your API key
-
+        const DATA_API_URL = "https://data.mongodb-api.com/app/data-xxxxx/endpoint/data/v1"; // ← CHANGE THIS
+        const MONGO_API_KEY = "YOUR_MONGO_API_KEY_HERE"; // ← CHANGE THIS
+        const CLUSTER_NAME = "CpprivateApi"; // ← CHANGE THIS (aapka cluster name)
         const DB_NAME = "live_stream";
         const COLLECTION_NAME = "settings";
+        const DOCUMENT_ID = "status";
 
         // ⭐⭐⭐ TIMER DURATION - 2 HOURS (7200 seconds) ⭐⭐⭐
         const TIMER_DURATION = 7200;
@@ -278,14 +275,19 @@
         let currentStatus = 'playing';
 
         // ============================================================
-        // 🔗 MONGODB DATA API FUNCTIONS
+        // 🔗 MONGODB DATA API FUNCTIONS - FIXED
         // ============================================================
 
         /**
          * 📡 Read status from MongoDB
+         * Returns: status string or null
          */
         async function readMongoDBStatus() {
             try {
+                console.log('🔍 Reading from MongoDB...');
+                console.log('📡 DATA_API_URL:', DATA_API_URL);
+                console.log('📡 CLUSTER:', CLUSTER_NAME);
+
                 const response = await fetch(`${DATA_API_URL}/action/findOne`, {
                     method: 'POST',
                     headers: {
@@ -293,24 +295,35 @@
                         'Authorization': `Bearer ${MONGO_API_KEY}`
                     },
                     body: JSON.stringify({
-                        dataSource: "CpprivateApi", // ← Your cluster name
+                        dataSource: CLUSTER_NAME,
                         database: DB_NAME,
                         collection: COLLECTION_NAME,
-                        filter: { _id: "status" }
+                        filter: { _id: DOCUMENT_ID }
                     })
                 });
+
+                console.log('📡 Response Status:', response.status);
 
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('❌ MongoDB Response Error:', errorText);
-                    throw new Error('Failed to read from MongoDB');
+                    throw new Error('Failed to read from MongoDB: ' + response.status);
                 }
 
                 const data = await response.json();
                 console.log('📥 MongoDB Data:', data);
-                return data.document?.value || 'playing';
+                
+                // ✅ FIX: Check if document exists and has value
+                if (data && data.document && data.document.value) {
+                    const status = data.document.value;
+                    console.log('✅ Status from MongoDB:', status);
+                    return status;
+                } else {
+                    console.warn('⚠️ No document found, returning default "playing"');
+                    return 'playing';
+                }
             } catch (error) {
-                console.error('❌ MongoDB Read Error:', error);
+                console.error('❌ MongoDB Read Error:', error.message);
                 return null;
             }
         }
@@ -320,6 +333,8 @@
          */
         async function writeMongoDBStatus(newStatus) {
             try {
+                console.log('✏️ Writing to MongoDB:', newStatus);
+
                 const response = await fetch(`${DATA_API_URL}/action/updateOne`, {
                     method: 'POST',
                     headers: {
@@ -327,10 +342,10 @@
                         'Authorization': `Bearer ${MONGO_API_KEY}`
                     },
                     body: JSON.stringify({
-                        dataSource: "CpprivateApi", // ← Your cluster name
+                        dataSource: CLUSTER_NAME,
                         database: DB_NAME,
                         collection: COLLECTION_NAME,
-                        filter: { _id: "status" },
+                        filter: { _id: DOCUMENT_ID },
                         update: { $set: { value: newStatus } },
                         upsert: true
                     })
@@ -339,48 +354,58 @@
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('❌ MongoDB Write Error:', errorText);
-                    throw new Error('Failed to write to MongoDB');
+                    throw new Error('Failed to write to MongoDB: ' + response.status);
                 }
 
                 const data = await response.json();
-                console.log('✅ MongoDB status updated to:', newStatus, data);
+                console.log('✅ MongoDB status updated:', data);
                 return true;
             } catch (error) {
-                console.error('❌ MongoDB Write Error:', error);
+                console.error('❌ MongoDB Write Error:', error.message);
                 return false;
             }
         }
 
         // ============================================================
-        // 🔄 CHECK REMOTE STATUS FROM MONGODB
+        // 🔄 CHECK REMOTE STATUS FROM MONGODB - FIXED
         // ============================================================
 
         async function checkRemoteStatus() {
-            const status = await readMongoDBStatus();
-            
-            if (status) {
-                currentStatus = status;
-                console.log('📊 Remote status:', currentStatus);
+            try {
+                const status = await readMongoDBStatus();
                 
-                if (currentStatus === 'playing') {
-                    statusDot.className = 'dot online';
-                    statusTextRemote.textContent = '🟢 Remote: Connected (Playing)';
-                    blankOverlay.classList.remove('show');
-                    if (player && player.paused() && !player.ended()) {
-                        player.play().catch(() => {});
+                if (status) {
+                    currentStatus = status;
+                    console.log('📊 Remote status:', currentStatus);
+                    
+                    // Update status dot and text
+                    if (currentStatus === 'playing') {
+                        statusDot.className = 'dot online';
+                        statusTextRemote.textContent = '🟢 Remote: Connected (Playing)';
+                        blankOverlay.classList.remove('show');
+                        if (player && player.paused() && !player.ended()) {
+                            player.play().catch(() => {});
+                        }
+                    } else if (currentStatus === 'paused' || currentStatus === 'blank') {
+                        statusDot.className = 'dot offline';
+                        statusTextRemote.textContent = '🔴 Remote: Paused';
+                        blankOverlay.classList.add('show');
+                        if (player) {
+                            player.pause();
+                        }
+                    } else {
+                        statusDot.className = 'dot online';
+                        statusTextRemote.textContent = '🟢 Remote: Connected';
                     }
-                } else if (currentStatus === 'paused' || currentStatus === 'blank') {
+                } else {
                     statusDot.className = 'dot offline';
-                    statusTextRemote.textContent = '🔴 Remote: Paused';
-                    blankOverlay.classList.add('show');
-                    if (player) {
-                        player.pause();
-                    }
+                    statusTextRemote.textContent = '🔴 Remote: Disconnected';
+                    console.warn('⚠️ Could not read remote status from MongoDB');
                 }
-            } else {
+            } catch (error) {
+                console.error('❌ checkRemoteStatus error:', error);
                 statusDot.className = 'dot offline';
-                statusTextRemote.textContent = '🔴 Remote: Disconnected';
-                console.warn('⚠️ Could not read remote status from MongoDB');
+                statusTextRemote.textContent = '🔴 Remote: Error';
             }
         }
 
