@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Video Control</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Admin Panel - Full Control</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ================================================================
+           CSS - Admin Panel Premium Dark Theme
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #0a0a12;
@@ -16,75 +23,519 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            background-image: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a12 70%);
         }
+
         .container {
-            max-width: 500px;
+            max-width: 700px;
             width: 100%;
-            background: #1a1a2e;
-            border-radius: 16px;
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 30px;
-            border: 1px solid #2a2a4e;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(42, 42, 78, 0.6);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
         }
-        .hidden { display: none !important; }
 
-        #loginPage { text-align: center; }
-        .lock-icon { font-size: 60px; margin-bottom: 15px; }
-        .login-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .login-subtitle { color: #a0a0b8; font-size: 14px; margin-bottom: 25px; }
-        .login-input { width: 100%; padding: 14px 18px; border-radius: 10px; border: 1px solid #2a2a4e; background: #0f0f23; color: #fff; font-size: 16px; outline: none; transition: 0.3s; }
-        .login-input:focus { border-color: #f7971e; box-shadow: 0 0 0 3px rgba(247,151,30,0.15); }
-        .login-btn { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #f7971e, #ffd200); color: #0a0a12; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .login-btn:hover { transform: scale(1.02); box-shadow: 0 8px 30px rgba(247,151,30,0.35); }
-        .login-error { color: #ff6b6b; font-size: 14px; margin-top: 12px; min-height: 20px; }
+        .hidden {
+            display: none !important;
+        }
 
-        #adminPanel { text-align: center; }
-        .admin-icon { font-size: 50px; margin-bottom: 10px; }
-        .admin-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .admin-subtitle { color: #a0a0b8; font-size: 13px; margin-bottom: 20px; }
+        /* ===== LOGIN PAGE ===== */
+        #loginPage {
+            text-align: center;
+        }
 
-        .status-box { background: #12121e; border-radius: 10px; padding: 15px; border: 1px solid #2a2a4e; margin-bottom: 20px; }
-        .status-box .label { color: #a0a0b8; font-size: 13px; }
-        .status-box .value { font-size: 18px; font-weight: 700; margin-top: 5px; }
-        .status-box .value.online { color: #00ff88; }
-        .status-box .value.offline { color: #ff6b6b; }
+        .lock-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
 
-        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .btn { padding: 14px 30px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; font-family: 'Segoe UI', sans-serif; flex: 1; min-width: 120px; }
-        .btn-pause { background: linear-gradient(135deg, #ff0044, #cc0033); color: #fff; box-shadow: 0 4px 20px rgba(255,0,68,0.3); }
-        .btn-pause:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(255,0,68,0.5); }
-        .btn-pause:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-resume { background: linear-gradient(135deg, #00ff88, #00cc66); color: #0a0a12; box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
-        .btn-resume:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(0,255,136,0.5); }
-        .btn-resume:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-blank { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; box-shadow: 0 4px 20px rgba(108,92,231,0.3); }
-        .btn-blank:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(108,92,231,0.5); }
-        .btn-blank:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-remove-blank { background: linear-gradient(135deg, #00b894, #00cec9); color: #fff; box-shadow: 0 4px 20px rgba(0,184,148,0.3); }
-        .btn-remove-blank:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(0,184,148,0.5); }
-        .btn-remove-blank:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-refresh { background: #0f0f23; border: 1px solid #2a2a4e; color: #a0a0b8; padding: 14px 20px; flex: 0.5; min-width: 60px; }
-        .btn-refresh:hover { border-color: #f7971e; color: #fff; }
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        .message { margin-top: 15px; padding: 10px 16px; border-radius: 8px; font-size: 14px; display: none; }
-        .message.show { display: block; }
-        .message.success { color: #00ff88; background: rgba(0,255,136,0.08); border-left: 3px solid #00ff88; }
-        .message.error { color: #ff6b6b; background: rgba(255,0,0,0.08); border-left: 3px solid #ff6b6b; }
-        .message.info { color: #f7971e; background: rgba(247,151,30,0.08); border-left: 3px solid #f7971e; }
+        .login-subtitle {
+            color: #a0a0b8;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
 
-        .footer { margin-top: 20px; text-align: center; color: #6a6a8a; font-size: 12px; border-top: 1px solid #1a1a3e; padding-top: 18px; }
-        .footer .highlight { color: #f7971e; }
-        .last-updated { color: #6a6a8a; font-size: 11px; margin-top: 8px; }
-        .connection-status { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: #6a6a8a; margin-top: 10px; }
-        .connection-status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .connection-status .dot.online { background: #00ff88; }
-        .connection-status .dot.offline { background: #ff6b6b; }
+        .login-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #2a2a4e;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: #f7971e;
+            box-shadow: 0 0 0 3px rgba(247, 151, 30, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
+        .login-error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        #adminPanel {
+            text-align: center;
+        }
+
+        .admin-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .admin-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-subtitle {
+            color: #a0a0b8;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        /* ===== STREAM CONFIG ===== */
+        .config-section {
+            background: rgba(18, 18, 30, 0.6);
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .config-section .label {
+            color: #a0a0b8;
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .config-section input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #2a2a4e;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .config-section input:focus {
+            border-color: #f7971e;
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.1);
+        }
+
+        .config-section input::placeholder {
+            color: #6a6a8a;
+        }
+
+        .config-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .config-row .config-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-apply {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-apply:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(0, 206, 201, 0.3);
+        }
+
+        .btn-refresh-users {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-refresh-users:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
+        /* ===== STATUS BOX ===== */
+        .status-box {
+            background: rgba(18, 18, 30, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 16px;
+        }
+
+        .status-box .label {
+            color: #a0a0b8;
+            font-size: 13px;
+        }
+
+        .status-box .value {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .status-box .value.online {
+            color: #00ff88;
+        }
+
+        .status-box .value.offline {
+            color: #ff6b6b;
+        }
+
+        /* ===== KEYS LIST ===== */
+        .keys-container {
+            background: rgba(18, 18, 30, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .keys-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #a0a0b8;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .keys-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+        }
+
+        .key-item {
+            background: #0f0f23;
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            padding: 8px 6px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f7971e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .key-item:hover {
+            background: #1a1a3e;
+            border-color: #f7971e;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
+        }
+
+        .key-item.copied {
+            background: #00ff88;
+            color: #0a0a12;
+            border-color: #00ff88;
+        }
+
+        .key-item.used {
+            background: #2a2a3e;
+            color: #6a6a8a;
+            border-color: #3a3a5e;
+            cursor: not-allowed;
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-generate:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
+        /* ===== CONTROLS ===== */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #ff0044, #cc0033);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.3);
+        }
+
+        .btn-pause:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.5);
+        }
+
+        .btn-pause:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-resume {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #0a0a12;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-resume:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-resume:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-blank {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-blank:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.5);
+        }
+
+        .btn-blank:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-remove-blank {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-remove-blank:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 184, 148, 0.5);
+        }
+
+        .btn-remove-blank:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-refresh {
+            background: #0f0f23;
+            border: 1px solid #2a2a4e;
+            color: #a0a0b8;
+            padding: 12px 16px;
+            flex: 0.5;
+            min-width: 50px;
+        }
+
+        .btn-refresh:hover {
+            border-color: #f7971e;
+            color: #fff;
+        }
+
+        /* ===== MESSAGE ===== */
+        .message {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.08);
+            border-left: 3px solid #00ff88;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+            background: rgba(255, 0, 0, 0.08);
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .message.info {
+            color: #f7971e;
+            background: rgba(247, 151, 30, 0.08);
+            border-left: 3px solid #f7971e;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #6a6a8a;
+            font-size: 12px;
+            border-top: 1px solid #1a1a3e;
+            padding-top: 18px;
+        }
+
+        .footer .highlight {
+            color: #f7971e;
+        }
+
+        .last-updated {
+            color: #6a6a8a;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #6a6a8a;
+            margin-top: 10px;
+        }
+
+        .connection-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .connection-status .dot.online {
+            background: #00ff88;
+        }
+
+        .connection-status .dot.offline {
+            background: #ff6b6b;
+        }
 
         @media (max-width: 480px) {
-            .container { padding: 20px; }
-            .btn { min-width: 100px; padding: 12px 20px; font-size: 14px; }
-            .btn-group { flex-direction: column; }
-            .btn-refresh { flex: 1; }
+            .container {
+                padding: 16px;
+            }
+            .btn {
+                min-width: 80px;
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-refresh {
+                flex: 1;
+            }
+            .config-row {
+                flex-direction: column;
+            }
+            .config-row .config-section {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -113,6 +564,29 @@
                 <span id="connText">Connected to API</span>
             </div>
 
+            <!-- ===== STREAM CONFIG ===== -->
+            <div class="config-section">
+                <span class="label">📺 Class Name</span>
+                <input type="text" id="classNameInput" placeholder="Enter class name..." value="ClassPlus Live">
+            </div>
+
+            <div class="config-section">
+                <span class="label">🔗 Stream URL (M3U8)</span>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <input type="text" id="streamUrlInput" placeholder="Enter .m3u8 link..." style="flex:1; min-width:200px;" value="https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8">
+                    <button class="btn-apply" onclick="applyStreamConfig()" style="flex:0 0 auto; padding:10px 20px; width:auto;">✅ Apply</button>
+                </div>
+            </div>
+
+            <!-- ===== REFRESH USERS BUTTON ===== -->
+            <div class="config-section">
+                <button class="btn-refresh-users" onclick="refreshAllUsers()">🔄 Refresh All Users</button>
+                <div style="font-size:11px; color:#6a6a8a; margin-top:5px; text-align:center;">
+                    This will force all users' browsers to reload and get the latest stream config
+                </div>
+            </div>
+
+            <!-- ===== STATUS ===== -->
             <div class="status-box">
                 <div class="label">📊 Current Status</div>
                 <div class="value" id="statusValue">
@@ -120,12 +594,20 @@
                 </div>
             </div>
 
+            <!-- ===== KEYS LIST ===== -->
+            <div class="keys-container">
+                <div class="keys-title">🔑 Available Keys <span style="color:#6a6a8a;font-weight:400;">(Click to copy)</span></div>
+                <div class="keys-grid" id="adminKeyGrid"></div>
+                <button class="btn-generate" onclick="regenerateKeys()">🔄 Generate New Keys</button>
+            </div>
+
+            <!-- ===== CONTROLS ===== -->
             <div class="btn-group">
-                <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause Video</button>
-                <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play Video</button>
-                <button class="btn btn-blank" id="blankBtn" onclick="showBlankPage()">📺 Blank Page</button>
-                <button class="btn btn-remove-blank" id="removeBlankBtn" onclick="removeBlankPage()">🖼️ Remove Blank</button>
-                <button class="btn btn-refresh" onclick="fetchStatus()" title="Refresh Status">🔄</button>
+                <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause</button>
+                <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play</button>
+                <button class="btn btn-blank" id="blankBtn" onclick="showBlankPage()">📺 Blank</button>
+                <button class="btn btn-remove-blank" id="removeBlankBtn" onclick="removeBlankPage()">🖼️ Remove</button>
+                <button class="btn btn-refresh" onclick="fetchStatus()" title="Refresh">🔄</button>
             </div>
 
             <div id="adminMessage" class="message"></div>
@@ -141,10 +623,12 @@
     <script>
         /**
          * ================================================================
-         *  🎬 ADMIN PANEL - Cloudflare D1 Control
+         *  🎬 ADMIN PANEL - Full Control with DB Sync
          *  - Password protected login
-         *  - Pause/Play/Blank Page controls
-         *  - Cross-device communication
+         *  - Set Class Name & Stream URL (saved to Cloudflare D1)
+         *  - Refresh Users button (forces all users to reload)
+         *  - 10 keys with regenerate button
+         *  - One-time use key system (FIXED)
          * ================================================================
          */
 
@@ -154,6 +638,12 @@
 
         const ADMIN_PASSWORD = "admin123";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
+
+        // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
+        let VALID_KEYS = [
+            'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
+            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
+        ];
 
         // ============================================================
         // 📦 DOM REFS
@@ -172,6 +662,35 @@
         const lastUpdated = document.getElementById('lastUpdated');
         const connDot = document.getElementById('connDot');
         const connText = document.getElementById('connText');
+        const adminKeyGrid = document.getElementById('adminKeyGrid');
+
+        const classNameInput = document.getElementById('classNameInput');
+        const streamUrlInput = document.getElementById('streamUrlInput');
+
+        // ============================================================
+        // 🔑 KEY GENERATION
+        // ============================================================
+
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let key = '';
+            for (let i = 0; i < 8; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        }
+
+        function regenerateKeys() {
+            const newKeys = [];
+            for (let i = 0; i < 10; i++) {
+                newKeys.push(generateRandomKey());
+            }
+            VALID_KEYS = newKeys;
+            localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
+            localStorage.setItem('usedKeys', JSON.stringify([]));
+            renderAdminKeys();
+            showAdminMessage('✅ 10 new keys generated!', 'success');
+        }
 
         // ============================================================
         // 🔐 LOGIN
@@ -184,10 +703,12 @@
                 loginPage.classList.add('hidden');
                 adminPanel.classList.remove('hidden');
                 loginError.textContent = '';
+                loadKeysFromStorage();
+                renderAdminKeys();
                 fetchStatus();
                 setInterval(fetchStatus, 3000);
             } else {
-                loginError.textContent = '❌ Invalid password! Please try again.';
+                loginError.textContent = '❌ Invalid password!';
                 passwordInput.value = '';
                 passwordInput.focus();
             }
@@ -196,6 +717,150 @@
         passwordInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') login();
         });
+
+        // ============================================================
+        // 💾 LOAD KEYS FROM STORAGE
+        // ============================================================
+
+        function loadKeysFromStorage() {
+            const savedKeys = localStorage.getItem('validKeys');
+            if (savedKeys) {
+                try {
+                    const parsed = JSON.parse(savedKeys);
+                    if (Array.isArray(parsed) && parsed.length === 10) {
+                        VALID_KEYS = parsed;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+
+        // ============================================================
+        // 🔑 RENDER ADMIN KEYS
+        // ============================================================
+
+        function renderAdminKeys() {
+            const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
+            adminKeyGrid.innerHTML = '';
+
+            VALID_KEYS.forEach(key => {
+                const el = document.createElement('div');
+                el.className = 'key-item';
+                if (usedKeys.includes(key)) {
+                    el.classList.add('used');
+                }
+                el.textContent = key;
+                el.title = usedKeys.includes(key) ? '❌ Already used!' : 'Click to copy';
+
+                el.addEventListener('click', function() {
+                    if (usedKeys.includes(key)) {
+                        showAdminMessage('❌ This key has already been used!', 'error');
+                        return;
+                    }
+                    navigator.clipboard.writeText(key).then(() => {
+                        el.classList.add('copied');
+                        setTimeout(() => { el.classList.remove('copied'); }, 800);
+                        showAdminMessage(`✅ Key copied: ${key}`, 'success');
+                    }).catch(() => {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = key;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        el.classList.add('copied');
+                        setTimeout(() => { el.classList.remove('copied'); }, 800);
+                        showAdminMessage(`✅ Key copied: ${key}`, 'success');
+                    });
+                });
+
+                adminKeyGrid.appendChild(el);
+            });
+        }
+
+        // ============================================================
+        // 🎬 APPLY STREAM CONFIG (Save to DB via Worker)
+        // ============================================================
+
+        async function applyStreamConfig() {
+            const className = classNameInput.value.trim() || "ClassPlus Live";
+            const streamUrl = streamUrlInput.value.trim();
+
+            if (!streamUrl) {
+                showAdminMessage('❌ Please enter a valid stream URL!', 'error');
+                return;
+            }
+
+            showAdminMessage('⏳ Saving config to database...', 'info');
+
+            try {
+                // Save config to Cloudflare D1 via Worker
+                const response = await fetch(`${WORKER_URL}/update-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        className: className,
+                        streamUrl: streamUrl
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to save config');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage(`✅ Config saved to database! Class: ${className}`, 'success');
+                    // Also save locally for immediate use
+                    localStorage.setItem('adminClassName', className);
+                    localStorage.setItem('adminStreamUrl', streamUrl);
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Config save error:', error);
+                // Fallback: save locally only
+                localStorage.setItem('adminClassName', className);
+                localStorage.setItem('adminStreamUrl', streamUrl);
+                showAdminMessage(`⚠️ Saved locally only (DB error: ${error.message})`, 'error');
+            }
+        }
+
+        // ============================================================
+        // 🔄 REFRESH ALL USERS (Force reload via DB flag)
+        // ============================================================
+
+        async function refreshAllUsers() {
+            showAdminMessage('⏳ Sending refresh signal to all users...', 'info');
+
+            try {
+                // Set refresh flag in DB
+                const response = await fetch(`${WORKER_URL}/set-refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh: true })
+                });
+
+                if (!response.ok) throw new Error('Failed to send refresh signal');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage('✅ Refresh signal sent! All users will reload.', 'success');
+                    // Clear refresh flag after 2 seconds
+                    setTimeout(async () => {
+                        await fetch(`${WORKER_URL}/set-refresh`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ refresh: false })
+                        });
+                    }, 2000);
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Refresh error:', error);
+                showAdminMessage(`❌ Failed to send refresh signal: ${error.message}`, 'error');
+            }
+        }
 
         // ============================================================
         // 📊 FETCH STATUS
@@ -242,6 +907,7 @@
                 connText.textContent = '✅ Connected to API';
                 lastUpdated.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
                 hideAdminMessage();
+                renderAdminKeys();
 
             } catch (error) {
                 console.error('❌ Fetch error:', error);
@@ -291,10 +957,10 @@
                 showAdminMessage(`❌ Failed to ${actionName}`, 'error');
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = actionName === 'pause' ? '⏸️ Pause Video' :
-                                     actionName === 'resume' ? '▶️ Play Video' :
-                                     actionName === 'blank' ? '📺 Blank Page' :
-                                     '🖼️ Remove Blank';
+                    btn.textContent = actionName === 'pause' ? '⏸️ Pause' :
+                                     actionName === 'resume' ? '▶️ Play' :
+                                     actionName === 'blank' ? '📺 Blank' :
+                                     '🖼️ Remove';
                 }
             }
         }
@@ -331,6 +997,23 @@
             adminMessage.className = 'message';
             adminMessage.textContent = '';
         }
+
+        // ============================================================
+        // 🚀 LOAD SAVED CONFIG
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedClassName = localStorage.getItem('adminClassName');
+            const savedStreamUrl = localStorage.getItem('adminStreamUrl');
+
+            if (savedClassName) {
+                classNameInput.value = savedClassName;
+            }
+            if (savedStreamUrl) {
+                streamUrlInput.value = savedStreamUrl;
+            }
+
+            loadKeysFromStorage();
+        });
 
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
