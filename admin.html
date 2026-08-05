@@ -1,119 +1,341 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Video Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { font-family: system-ui; max-width: 400px; margin: 2rem auto; padding: 1rem; background: #111; color: #eee; text-align: center; }
-        .status { padding: 1rem; margin: 1rem 0; border-radius: 8px; background: #222; }
-        .playing { color: #4caf50; }
-        .paused { color: #f44336; }
-        button { padding: 0.8rem 2rem; margin: 0.5rem; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-        #pauseBtn { background: #f44336; color: white; }
-        #playBtn { background: #4caf50; color: white; }
-        #pauseBtn:disabled, #playBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a12;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #2a2a4e;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+        .hidden { display: none !important; }
+
+        #loginPage { text-align: center; }
+        .lock-icon { font-size: 60px; margin-bottom: 15px; }
+        .login-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .login-subtitle { color: #a0a0b8; font-size: 14px; margin-bottom: 25px; }
+        .login-input { width: 100%; padding: 14px 18px; border-radius: 10px; border: 1px solid #2a2a4e; background: #0f0f23; color: #fff; font-size: 16px; outline: none; transition: 0.3s; }
+        .login-input:focus { border-color: #f7971e; box-shadow: 0 0 0 3px rgba(247,151,30,0.15); }
+        .login-btn { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, #f7971e, #ffd200); color: #0a0a12; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 8px 30px rgba(247,151,30,0.35); }
+        .login-error { color: #ff6b6b; font-size: 14px; margin-top: 12px; min-height: 20px; }
+
+        #adminPanel { text-align: center; }
+        .admin-icon { font-size: 50px; margin-bottom: 10px; }
+        .admin-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .admin-subtitle { color: #a0a0b8; font-size: 13px; margin-bottom: 20px; }
+
+        .status-box { background: #12121e; border-radius: 10px; padding: 15px; border: 1px solid #2a2a4e; margin-bottom: 20px; }
+        .status-box .label { color: #a0a0b8; font-size: 13px; }
+        .status-box .value { font-size: 18px; font-weight: 700; margin-top: 5px; }
+        .status-box .value.online { color: #00ff88; }
+        .status-box .value.offline { color: #ff6b6b; }
+
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .btn { padding: 14px 30px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; font-family: 'Segoe UI', sans-serif; flex: 1; min-width: 120px; }
+        .btn-pause { background: linear-gradient(135deg, #ff0044, #cc0033); color: #fff; box-shadow: 0 4px 20px rgba(255,0,68,0.3); }
+        .btn-pause:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(255,0,68,0.5); }
+        .btn-pause:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-resume { background: linear-gradient(135deg, #00ff88, #00cc66); color: #0a0a12; box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
+        .btn-resume:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(0,255,136,0.5); }
+        .btn-resume:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-blank { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; box-shadow: 0 4px 20px rgba(108,92,231,0.3); }
+        .btn-blank:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(108,92,231,0.5); }
+        .btn-blank:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-remove-blank { background: linear-gradient(135deg, #00b894, #00cec9); color: #fff; box-shadow: 0 4px 20px rgba(0,184,148,0.3); }
+        .btn-remove-blank:hover { transform: scale(1.03); box-shadow: 0 8px 30px rgba(0,184,148,0.5); }
+        .btn-remove-blank:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-refresh { background: #0f0f23; border: 1px solid #2a2a4e; color: #a0a0b8; padding: 14px 20px; flex: 0.5; min-width: 60px; }
+        .btn-refresh:hover { border-color: #f7971e; color: #fff; }
+
+        .message { margin-top: 15px; padding: 10px 16px; border-radius: 8px; font-size: 14px; display: none; }
+        .message.show { display: block; }
+        .message.success { color: #00ff88; background: rgba(0,255,136,0.08); border-left: 3px solid #00ff88; }
+        .message.error { color: #ff6b6b; background: rgba(255,0,0,0.08); border-left: 3px solid #ff6b6b; }
+        .message.info { color: #f7971e; background: rgba(247,151,30,0.08); border-left: 3px solid #f7971e; }
+
+        .footer { margin-top: 20px; text-align: center; color: #6a6a8a; font-size: 12px; border-top: 1px solid #1a1a3e; padding-top: 18px; }
+        .footer .highlight { color: #f7971e; }
+        .last-updated { color: #6a6a8a; font-size: 11px; margin-top: 8px; }
+        .connection-status { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: #6a6a8a; margin-top: 10px; }
+        .connection-status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .connection-status .dot.online { background: #00ff88; }
+        .connection-status .dot.offline { background: #ff6b6b; }
+
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            .btn { min-width: 100px; padding: 12px 20px; font-size: 14px; }
+            .btn-group { flex-direction: column; }
+            .btn-refresh { flex: 1; }
+        }
     </style>
 </head>
 <body>
-    <h2>🎬 वीडियो नियंत्रण</h2>
-    <div class="status" id="statusDisplay">
-        <p>स्थिति: <span id="statusText" class="playing">लोड हो रहा है...</span></p>
+
+    <div class="container">
+
+        <!-- ===== LOGIN PAGE ===== -->
+        <div id="loginPage">
+            <div class="lock-icon">🔐</div>
+            <div class="login-title">Admin Login</div>
+            <div class="login-subtitle">Enter your credentials to control the stream</div>
+            <input type="password" class="login-input" id="passwordInput" placeholder="Enter password" autofocus>
+            <button class="login-btn" onclick="login()">🔓 Login</button>
+            <div id="loginError" class="login-error"></div>
+        </div>
+
+        <!-- ===== ADMIN PANEL ===== -->
+        <div id="adminPanel" class="hidden">
+            <div class="admin-icon">🎬</div>
+            <div class="admin-title">Video Control</div>
+            <div class="admin-subtitle">Control your live stream remotely</div>
+
+            <div class="connection-status">
+                <span class="dot online" id="connDot"></span>
+                <span id="connText">Connected to API</span>
+            </div>
+
+            <div class="status-box">
+                <div class="label">📊 Current Status</div>
+                <div class="value" id="statusValue">
+                    <span id="statusText">Checking...</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause Video</button>
+                <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play Video</button>
+                <button class="btn btn-blank" id="blankBtn" onclick="showBlankPage()">📺 Blank Page</button>
+                <button class="btn btn-remove-blank" id="removeBlankBtn" onclick="removeBlankPage()">🖼️ Remove Blank</button>
+                <button class="btn btn-refresh" onclick="fetchStatus()" title="Refresh Status">🔄</button>
+            </div>
+
+            <div id="adminMessage" class="message"></div>
+            <div class="last-updated" id="lastUpdated">Last updated: --</div>
+
+            <div class="footer">
+                ⚡ <span class="highlight">Remote Control</span> — Cloudflare D1
+            </div>
+        </div>
+
     </div>
-    <div>
-        <button id="pauseBtn">⏸️ रोकें</button>
-        <button id="playBtn" disabled>▶️ चलाएँ</button>
-    </div>
-    <p id="message"></p>
 
     <script>
+        /**
+         * ================================================================
+         *  🎬 ADMIN PANEL - Cloudflare D1 Control
+         *  - Password protected login
+         *  - Pause/Play/Blank Page controls
+         *  - Cross-device communication
+         * ================================================================
+         */
+
         // ============================================================
-        // 🔑 अपना Worker URL यहाँ डालें
+        // 🔑 CONFIGURATION
         // ============================================================
+
+        const ADMIN_PASSWORD = "admin123";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
+
+        // ============================================================
+        // 📦 DOM REFS
+        // ============================================================
+        const loginPage = document.getElementById('loginPage');
+        const adminPanel = document.getElementById('adminPanel');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginError = document.getElementById('loginError');
 
         const statusText = document.getElementById('statusText');
         const pauseBtn = document.getElementById('pauseBtn');
-        const playBtn = document.getElementById('playBtn');
-        const messageEl = document.getElementById('message');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const blankBtn = document.getElementById('blankBtn');
+        const removeBlankBtn = document.getElementById('removeBlankBtn');
+        const adminMessage = document.getElementById('adminMessage');
+        const lastUpdated = document.getElementById('lastUpdated');
+        const connDot = document.getElementById('connDot');
+        const connText = document.getElementById('connText');
 
         // ============================================================
-        // 📊 स्टेटस फेच करें और UI अपडेट करें
+        // 🔐 LOGIN
         // ============================================================
+
+        function login() {
+            const password = passwordInput.value.trim();
+
+            if (password === ADMIN_PASSWORD) {
+                loginPage.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                loginError.textContent = '';
+                fetchStatus();
+                setInterval(fetchStatus, 3000);
+            } else {
+                loginError.textContent = '❌ Invalid password! Please try again.';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+
+        // ============================================================
+        // 📊 FETCH STATUS
+        // ============================================================
+
         async function fetchStatus() {
             try {
                 const response = await fetch(`${WORKER_URL}/status`);
-                if (!response.ok) throw new Error('Failed to fetch status');
+                if (!response.ok) throw new Error('Failed to fetch');
                 const data = await response.json();
                 const status = data.value || 'playing';
-                updateUI(status);
+
+                if (status === 'playing') {
+                    statusText.textContent = '▶️ Playing';
+                    statusText.className = 'value online';
+                    pauseBtn.disabled = false;
+                    resumeBtn.disabled = true;
+                    blankBtn.disabled = false;
+                    removeBlankBtn.disabled = true;
+                } else if (status === 'paused') {
+                    statusText.textContent = '⏸️ Paused';
+                    statusText.className = 'value offline';
+                    pauseBtn.disabled = true;
+                    resumeBtn.disabled = false;
+                    blankBtn.disabled = true;
+                    removeBlankBtn.disabled = true;
+                } else if (status === 'blank') {
+                    statusText.textContent = '📺 Blank Page';
+                    statusText.className = 'value offline';
+                    pauseBtn.disabled = true;
+                    resumeBtn.disabled = true;
+                    blankBtn.disabled = true;
+                    removeBlankBtn.disabled = false;
+                } else {
+                    statusText.textContent = '⚠️ Unknown';
+                    statusText.className = 'value';
+                    pauseBtn.disabled = true;
+                    resumeBtn.disabled = true;
+                    blankBtn.disabled = true;
+                    removeBlankBtn.disabled = true;
+                }
+
+                connDot.className = 'dot online';
+                connText.textContent = '✅ Connected to API';
+                lastUpdated.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+                hideAdminMessage();
+
             } catch (error) {
-                console.error('Error fetching status:', error);
-                messageEl.textContent = '⚠️ स्टेटस फेच करने में त्रुटि';
+                console.error('❌ Fetch error:', error);
+                connDot.className = 'dot offline';
+                connText.textContent = '❌ Disconnected';
+                statusText.textContent = '❌ Error';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = true;
+                showAdminMessage('❌ Failed to fetch status', 'error');
             }
         }
 
         // ============================================================
-        // 🎨 UI अपडेट करें
+        // ✏️ UPDATE STATUS
         // ============================================================
-        function updateUI(status) {
-            if (status === 'playing') {
-                statusText.textContent = '▶️ चल रहा है';
-                statusText.className = 'playing';
-                pauseBtn.disabled = false;
-                playBtn.disabled = true;
-            } else if (status === 'paused' || status === 'blank') {
-                statusText.textContent = '⏸️ रुका हुआ';
-                statusText.className = 'paused';
-                pauseBtn.disabled = true;
-                playBtn.disabled = false;
-            } else {
-                statusText.textContent = '❓ अज्ञात';
-                statusText.className = '';
-                pauseBtn.disabled = true;
-                playBtn.disabled = true;
-            }
-            messageEl.textContent = '';
-        }
 
-        // ============================================================
-        // ✏️ स्टेटस अपडेट करें (API को कॉल करें)
-        // ============================================================
-        async function updateStatus(newStatus) {
-            const action = newStatus === 'playing' ? 'चला' : 'रोका';
-            messageEl.textContent = `⏳ ${action} जा रहा है...`;
+        async function updateStatus(newStatus, actionName) {
+            const btn = document.querySelector(`.btn-${actionName === 'pause' ? 'pause' : actionName === 'resume' ? 'resume' : actionName === 'blank' ? 'blank' : 'remove-blank'}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ Processing...';
+            }
+
+            showAdminMessage(`⏳ ${actionName}ing...`, 'info');
+
             try {
                 const response = await fetch(`${WORKER_URL}/update`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
                 });
+
                 if (!response.ok) throw new Error('Update failed');
                 const data = await response.json();
+
                 if (data.success) {
-                    messageEl.textContent = `✅ वीडियो ${action} दिया गया!`;
-                    fetchStatus(); // तुरंत स्टेटस रिफ्रेश करें
+                    showAdminMessage(`✅ Video ${actionName}d!`, 'success');
+                    setTimeout(fetchStatus, 500);
                 } else {
                     throw new Error('API returned error');
                 }
             } catch (error) {
-                console.error('Error updating status:', error);
-                messageEl.textContent = `❌ ${action}ने में त्रुटि`;
-                fetchStatus(); // स्टेटस वापस रिफ्रेश करें
+                console.error('❌ Update error:', error);
+                showAdminMessage(`❌ Failed to ${actionName}`, 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = actionName === 'pause' ? '⏸️ Pause Video' :
+                                     actionName === 'resume' ? '▶️ Play Video' :
+                                     actionName === 'blank' ? '📺 Blank Page' :
+                                     '🖼️ Remove Blank';
+                }
             }
         }
 
-        // ============================================================
-        // 🔘 बटन इवेंट्स
-        // ============================================================
-        pauseBtn.addEventListener('click', () => updateStatus('paused'));
-        playBtn.addEventListener('click', () => updateStatus('playing'));
+        function pauseVideo() {
+            if (pauseBtn.disabled) return;
+            updateStatus('paused', 'pause');
+        }
+
+        function resumeVideo() {
+            if (resumeBtn.disabled) return;
+            updateStatus('playing', 'resume');
+        }
+
+        function showBlankPage() {
+            if (blankBtn.disabled) return;
+            updateStatus('blank', 'blank');
+        }
+
+        function removeBlankPage() {
+            if (removeBlankBtn.disabled) return;
+            updateStatus('playing', 'remove-blank');
+        }
 
         // ============================================================
-        // 🚀 पेज लोड होने पर और हर 5 सेकंड में स्टेटस चेक करें
+        // 📢 MESSAGE HELPER
         // ============================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStatus();
-            setInterval(fetchStatus, 5000);
-        });
+        function showAdminMessage(msg, type) {
+            adminMessage.textContent = msg;
+            adminMessage.className = 'message show ' + type;
+        }
+
+        function hideAdminMessage() {
+            adminMessage.className = 'message';
+            adminMessage.textContent = '';
+        }
+
+        console.log('✅ Admin Panel loaded!');
+        console.log('🔑 Password:', ADMIN_PASSWORD);
+        console.log('📡 API:', WORKER_URL);
     </script>
+
 </body>
 </html>
