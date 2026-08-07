@@ -139,7 +139,7 @@
         }
 
         /* ================================================================
-           🔥 CONTACT ADMIN BUTTONS - Both on Verification & Player Page
+           🔥 CONTACT ADMIN BUTTONS
            ================================================================ */
         .contact-admin {
             display: flex;
@@ -722,6 +722,134 @@
     <script>
         /**
          * ================================================================
+         *  🛡️ ANTI-DEVELOPER TOOLS - Mobile Friendly (FIXED)
+         *  - Mobile users: SAFE, no redirects
+         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J blocked
+         *  - RIGHT CLICK: ALLOWED
+         * ================================================================
+         */
+        (function antiDevTools() {
+            // 🔒 Keyboard shortcuts block (सभी devices पर काम करेगा)
+            document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                const ctrl = e.ctrlKey;
+                const shift = e.shiftKey;
+
+                // F12
+                if (key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+I (Inspect)
+                if (ctrl && shift && (key === 'I' || key === 'i' || e.keyCode === 73)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+J (Console)
+                if (ctrl && shift && (key === 'J' || key === 'j' || e.keyCode === 74)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+U (View Source)
+                if (ctrl && (key === 'U' || key === 'u' || e.keyCode === 85)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+C (Element picker)
+                if (ctrl && shift && (key === 'C' || key === 'c' || e.keyCode === 67)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+            });
+
+            // ✅ RIGHT CLICK: ALLOWED (कुछ नहीं करें)
+
+            // ============================================================
+            // 📱 MOBILE-FRIENDLY DETECTION (सिर्फ Desktop पर चेक करें)
+            // ============================================================
+            function isMobile() {
+                return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|BlackBerry|IEMobile/i.test(navigator.userAgent);
+            }
+
+            // ============================================================
+            // 🚀 DESKTOP पर ही DevTools Detection (Mobile को छोड़ें)
+            // ============================================================
+            if (!isMobile()) {
+                let detectionCount = 0;
+
+                function detectDevTools() {
+                    // Method 1: Window size difference (Desktop only)
+                    const widthDiff = window.outerWidth - window.innerWidth;
+                    const heightDiff = window.outerHeight - window.innerHeight;
+
+                    // Method 2: console.log timing (Desktop only)
+                    const start = performance.now();
+                    console.log('%c', {});
+                    const end = performance.now();
+
+                    // Method 3: Firebug check
+                    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
+                        detectionCount++;
+                        if (detectionCount >= 3) {
+                            window.location.href = 'https://www.google.com';
+                        }
+                        return;
+                    }
+
+                    // अगर DevTools खुला है तो Redirect करें (सिर्फ Desktop पर)
+                    if (widthDiff > 150 || heightDiff > 150 || (end - start > 15)) {
+                        detectionCount++;
+                        if (detectionCount >= 3) {
+                            window.location.href = 'https://www.google.com';
+                        }
+                    } else {
+                        detectionCount = 0;
+                    }
+                }
+
+                // Desktop पर हर 3 सेकंड में चेक करें
+                setInterval(detectDevTools, 3000);
+            }
+
+            // ============================================================
+            // 🧹 CONSOLE CLEANUP (Mobile पर भी काम करेगा)
+            // ============================================================
+            setInterval(function() {
+                console.clear();
+            }, 100);
+
+            // Console methods को silent करें
+            const noop = function() {};
+            console.log = noop;
+            console.warn = noop;
+            console.error = noop;
+            console.info = noop;
+            console.debug = noop;
+            console.table = noop;
+            console.dir = noop;
+
+            // Network tab clear
+            setInterval(function() {
+                try {
+                    if (window.performance && performance.clearResourceTimings) {
+                        performance.clearResourceTimings();
+                    }
+                } catch(e) { /* ignore */ }
+            }, 3000);
+
+            console.log('✅ Anti-DevTools: Mobile Friendly Mode ACTIVE');
+            console.log('🟢 RIGHT CLICK: ALLOWED');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+            console.log('📱 Mobile users: SAFE, no redirects');
+        })();
+
+        /**
+         * ================================================================
          *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
          *  - Keys loaded from Cloudflare D1 database
          *  - ONE-TIME USE: Keys cannot be reused
@@ -779,7 +907,7 @@
         async function loadKeysFromDB() {
             try {
                 const response = await fetch(`${WORKER_URL}/get-keys`);
-                if (!response.ok) return;
+                if (!response.ok) return false;
                 const data = await response.json();
 
                 if (data.keys && data.keys.length === 10) {
@@ -1251,6 +1379,10 @@
             console.log('🔄 Auto-refresh: Active');
             console.log('🔒 One-time use key system is ACTIVE');
             console.log('📱 Contact Admin buttons added on both pages');
+            console.log('🛡️ Anti-Developer Tools: ACTIVE (Mobile Friendly)');
+            console.log('🟢 RIGHT CLICK: ALLOWED');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+            console.log('📱 Mobile users: SAFE, no redirects');
         });
 
         // ============================================================
