@@ -629,14 +629,15 @@
     <script>
         /**
          * ================================================================
-         *  🛡️ ANTI-DEVELOPER TOOLS - Mobile Friendly (FIXED)
+         *  🛡️ ANTI-DEVELOPER TOOLS - INSTANT REDIRECT (0.1s) - Mobile Friendly
          *  - Mobile users: SAFE, no redirects
-         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J blocked
+         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J → INSTANT REDIRECT (0.1s)
+         *  - Network tab cleared every 100ms
          *  - RIGHT CLICK: ALLOWED
          * ================================================================
          */
         (function antiDevTools() {
-            // 🔒 Keyboard shortcuts block (सभी devices पर काम करेगा)
+            // 🔒 Keyboard shortcuts - INSTANT BLOCK (0.1s)
             document.addEventListener('keydown', function(e) {
                 const key = e.key;
                 const ctrl = e.ctrlKey;
@@ -645,92 +646,106 @@
                 // F12
                 if (key === 'F12' || e.keyCode === 123) {
                     e.preventDefault();
-                    window.location.href = 'https://www.google.com';
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
                 // Ctrl+Shift+I (Inspect)
                 if (ctrl && shift && (key === 'I' || key === 'i' || e.keyCode === 73)) {
                     e.preventDefault();
-                    window.location.href = 'https://www.google.com';
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
                 // Ctrl+Shift+J (Console)
                 if (ctrl && shift && (key === 'J' || key === 'j' || e.keyCode === 74)) {
                     e.preventDefault();
-                    window.location.href = 'https://www.google.com';
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
                 // Ctrl+U (View Source)
                 if (ctrl && (key === 'U' || key === 'u' || e.keyCode === 85)) {
                     e.preventDefault();
-                    window.location.href = 'https://www.google.com';
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
                 // Ctrl+Shift+C (Element picker)
                 if (ctrl && shift && (key === 'C' || key === 'c' || e.keyCode === 67)) {
                     e.preventDefault();
-                    window.location.href = 'https://www.google.com';
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
             });
 
-            // ✅ RIGHT CLICK: ALLOWED (कुछ नहीं करें)
+            // ✅ RIGHT CLICK: ALLOWED
 
             // ============================================================
-            // 📱 MOBILE-FRIENDLY DETECTION (सिर्फ Desktop पर चेक करें)
+            // 📱 MOBILE DETECTION - Desktop par hi chale
             // ============================================================
             function isMobile() {
                 return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|BlackBerry|IEMobile/i.test(navigator.userAgent);
             }
 
             // ============================================================
-            // 🚀 DESKTOP पर ही DevTools Detection (Mobile को छोड़ें)
+            // 🚀 DESKTOP: INSTANT DEVTOOLS DETECTION (0.1s)
             // ============================================================
             if (!isMobile()) {
                 let detectionCount = 0;
 
                 function detectDevTools() {
-                    // Method 1: Window size difference (Desktop only)
+                    // ⚡ Method 1: Window size difference
                     const widthDiff = window.outerWidth - window.innerWidth;
                     const heightDiff = window.outerHeight - window.innerHeight;
 
-                    // Method 2: console.log timing (Desktop only)
+                    // ⚡ Method 2: console.log timing
                     const start = performance.now();
                     console.log('%c', {});
                     const end = performance.now();
 
-                    // Method 3: Firebug check
+                    // ⚡ Method 3: Firebug check
                     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
                         detectionCount++;
-                        if (detectionCount >= 3) {
-                            window.location.href = 'https://www.google.com';
+                        if (detectionCount >= 1) {
+                            window.location.replace('https://www.google.com');
                         }
                         return;
                     }
 
-                    // अगर DevTools खुला है तो Redirect करें (सिर्फ Desktop पर)
-                    if (widthDiff > 150 || heightDiff > 150 || (end - start > 15)) {
+                    // ⚡ INSTANT REDIRECT - 1 detection par hi redirect
+                    if (widthDiff > 100 || heightDiff > 100 || (end - start > 10)) {
                         detectionCount++;
-                        if (detectionCount >= 3) {
-                            window.location.href = 'https://www.google.com';
+                        if (detectionCount >= 1) {
+                            window.location.replace('https://www.google.com');
                         }
                     } else {
                         detectionCount = 0;
                     }
                 }
 
-                // Desktop पर हर 3 सेकंड में चेक करें
-                setInterval(detectDevTools, 3000);
+                // ⚡ HAR 100ms (0.1 SECOND) ME CHECK KAREIN
+                setInterval(detectDevTools, 100);
             }
 
             // ============================================================
-            // 🧹 CONSOLE CLEANUP (Mobile पर भी काम करेगा)
+            // 🧹 NETWORK TAB CLEAR - HAR 100ms (0.1s)
             // ============================================================
             setInterval(function() {
-                console.clear();
+                try {
+                    if (window.performance && performance.clearResourceTimings) {
+                        performance.clearResourceTimings();
+                    }
+                } catch(e) { /* ignore */ }
             }, 100);
 
-            // Console methods को silent करें
+            // 🧹 CONSOLE CLEAR - HAR 50ms
+            setInterval(function() {
+                console.clear();
+            }, 50);
+
+            // Console methods ko silent karein
             const noop = function() {};
             console.log = noop;
             console.warn = noop;
@@ -740,18 +755,9 @@
             console.table = noop;
             console.dir = noop;
 
-            // Network tab clear
-            setInterval(function() {
-                try {
-                    if (window.performance && performance.clearResourceTimings) {
-                        performance.clearResourceTimings();
-                    }
-                } catch(e) { /* ignore */ }
-            }, 3000);
-
-            console.log('✅ Anti-DevTools: Mobile Friendly Mode ACTIVE');
+            console.log('✅ Anti-DevTools: INSTANT MODE (0.1s) ACTIVE');
             console.log('🟢 RIGHT CLICK: ALLOWED');
-            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
             console.log('📱 Mobile users: SAFE, no redirects');
         })();
 
@@ -1216,9 +1222,9 @@
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
         console.log('📡 API:', WORKER_URL);
-        console.log('🛡️ Anti-Developer Tools: ACTIVE (Mobile Friendly)');
+        console.log('🛡️ Anti-Developer Tools: INSTANT MODE (0.1s) ACTIVE');
         console.log('🟢 RIGHT CLICK: ALLOWED');
-        console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+        console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
         console.log('📱 Mobile users: SAFE, no redirects');
     </script>
 
