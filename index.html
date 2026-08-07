@@ -858,7 +858,7 @@
          * ================================================================
          *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
          *  - Keys loaded from Cloudflare D1 database
-         *  - ONE-TIME USE: Keys cannot be reused
+         *  - ONE-TIME USE: Keys cannot be reused (Database-driven)
          *  - Admin can generate and sync new keys
          *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
@@ -932,6 +932,44 @@
         }
 
         // ============================================================
+        // 🔍 CHECK USED KEYS FROM DATABASE (GET)
+        // ============================================================
+        async function fetchUsedKeysFromDB() {
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Failed to fetch used keys');
+                const data = await response.json();
+                return data.usedKeys || [];
+            } catch (error) {
+                console.error('❌ Failed to fetch used keys from DB:', error);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // 💾 SYNC USED KEYS TO DATABASE (POST)
+        // ============================================================
+        async function syncUsedKeysToDB(usedKeys) {
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usedKeys: usedKeys })
+                });
+                if (!response.ok) throw new Error('Failed to sync used keys');
+                const data = await response.json();
+                console.log('✅ Used keys synced to database:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ Failed to sync used keys:', error);
+                return null;
+            }
+        }
+
+        // ============================================================
         // 🏷️ LOAD ADMIN CONFIG FROM DB
         // ============================================================
 
@@ -986,10 +1024,9 @@
         }
 
         // ============================================================
-        // 🔐 VERIFICATION - ONE-TIME USE
+        // 🔐 VERIFICATION - ONE-TIME USE (Database se used keys check)
         // ============================================================
-
-        function verifyKey() {
+        async function verifyKey() {
             const enteredKey = keyInput.value.trim();
 
             if (!enteredKey) {
@@ -1004,10 +1041,12 @@
                 return;
             }
 
-            // Check if key has already been used
-            const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
-            if (usedKeys.includes(enteredKey)) {
-                verifyMessage.textContent = '❌ This key has already been used!';
+            // 🔍 DATABASE SE USED KEYS FETCH KAREIN
+            const usedKeysFromDB = await fetchUsedKeysFromDB();
+
+            // Check if key has already been used (Database se)
+            if (usedKeysFromDB.includes(enteredKey)) {
+                verifyMessage.textContent = '❌ This key has already been used! Please contact admin for a new key.';
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
@@ -1016,12 +1055,13 @@
 
             // Check if key is valid
             if (VALID_KEYS.includes(enteredKey)) {
-                // Mark key as used
-                usedKeys.push(enteredKey);
-                localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
-
-                // Sync used keys to DB
-                syncUsedKeysToDB(usedKeys);
+                // ✅ KEY VALID HAI, AB USE KAREIN
+                // Mark key as used in Database
+                usedKeysFromDB.push(enteredKey);
+                await syncUsedKeysToDB(usedKeysFromDB);
+                
+                // Local Storage bhi update karein (for quick check)
+                localStorage.setItem('usedKeys', JSON.stringify(usedKeysFromDB));
 
                 sessionKey = enteredKey;
                 localStorage.setItem('sessionKey', sessionKey);
@@ -1045,23 +1085,6 @@
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
-            }
-        }
-
-        // ============================================================
-        // 💾 SYNC USED KEYS TO DATABASE
-        // ============================================================
-
-        async function syncUsedKeysToDB(usedKeys) {
-            try {
-                await fetch(`${WORKER_URL}/sync-used-keys`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usedKeys: usedKeys })
-                });
-                console.log('✅ Used keys synced to database');
-            } catch (error) {
-                console.error('❌ Failed to sync used keys:', error);
             }
         }
 
@@ -1383,7 +1406,7 @@
             console.log('⏱️ Timer: 2 Hours');
             console.log('📡 Remote Control: Active');
             console.log('🔄 Auto-refresh: Active');
-            console.log('🔒 One-time use key system is ACTIVE');
+            console.log('🔒 One-time use key system is ACTIVE (Database-driven)');
             console.log('📱 Contact Admin buttons added on both pages');
             console.log('🛡️ Anti-Developer Tools: INSTANT MODE (0.1s) ACTIVE');
             console.log('🟢 RIGHT CLICK: ALLOWED');
