@@ -598,7 +598,13 @@
             <div class="keys-container">
                 <div class="keys-title">🔑 Available Keys <span style="color:#6a6a8a;font-weight:400;">(Click to copy)</span></div>
                 <div class="keys-grid" id="adminKeyGrid"></div>
-                <button class="btn-generate" onclick="regenerateKeys()">🔄 Generate New Keys</button>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <button class="btn-generate" onclick="regenerateKeys()" style="flex:1;">🔄 Generate New Keys</button>
+                    <button class="btn-generate" onclick="syncKeysToDB()" style="flex:1; background: linear-gradient(135deg, #00b894, #00cec9);">💾 Sync Keys to DB</button>
+                </div>
+                <div style="font-size:11px; color:#6a6a8a; margin-top:5px; text-align:center;">
+                    <span id="keySyncStatus">Keys are synced with database</span>
+                </div>
             </div>
 
             <!-- ===== CONTROLS ===== -->
@@ -623,11 +629,140 @@
     <script>
         /**
          * ================================================================
+         *  🛡️ ANTI-DEVELOPER TOOLS - Mobile Friendly (FIXED)
+         *  - Mobile users: SAFE, no redirects
+         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J blocked
+         *  - RIGHT CLICK: ALLOWED
+         * ================================================================
+         */
+        (function antiDevTools() {
+            // 🔒 Keyboard shortcuts block (सभी devices पर काम करेगा)
+            document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                const ctrl = e.ctrlKey;
+                const shift = e.shiftKey;
+
+                // F12
+                if (key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+I (Inspect)
+                if (ctrl && shift && (key === 'I' || key === 'i' || e.keyCode === 73)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+J (Console)
+                if (ctrl && shift && (key === 'J' || key === 'j' || e.keyCode === 74)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+U (View Source)
+                if (ctrl && (key === 'U' || key === 'u' || e.keyCode === 85)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+                // Ctrl+Shift+C (Element picker)
+                if (ctrl && shift && (key === 'C' || key === 'c' || e.keyCode === 67)) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.google.com';
+                    return false;
+                }
+            });
+
+            // ✅ RIGHT CLICK: ALLOWED (कुछ नहीं करें)
+
+            // ============================================================
+            // 📱 MOBILE-FRIENDLY DETECTION (सिर्फ Desktop पर चेक करें)
+            // ============================================================
+            function isMobile() {
+                return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|BlackBerry|IEMobile/i.test(navigator.userAgent);
+            }
+
+            // ============================================================
+            // 🚀 DESKTOP पर ही DevTools Detection (Mobile को छोड़ें)
+            // ============================================================
+            if (!isMobile()) {
+                let detectionCount = 0;
+
+                function detectDevTools() {
+                    // Method 1: Window size difference (Desktop only)
+                    const widthDiff = window.outerWidth - window.innerWidth;
+                    const heightDiff = window.outerHeight - window.innerHeight;
+
+                    // Method 2: console.log timing (Desktop only)
+                    const start = performance.now();
+                    console.log('%c', {});
+                    const end = performance.now();
+
+                    // Method 3: Firebug check
+                    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
+                        detectionCount++;
+                        if (detectionCount >= 3) {
+                            window.location.href = 'https://www.google.com';
+                        }
+                        return;
+                    }
+
+                    // अगर DevTools खुला है तो Redirect करें (सिर्फ Desktop पर)
+                    if (widthDiff > 150 || heightDiff > 150 || (end - start > 15)) {
+                        detectionCount++;
+                        if (detectionCount >= 3) {
+                            window.location.href = 'https://www.google.com';
+                        }
+                    } else {
+                        detectionCount = 0;
+                    }
+                }
+
+                // Desktop पर हर 3 सेकंड में चेक करें
+                setInterval(detectDevTools, 3000);
+            }
+
+            // ============================================================
+            // 🧹 CONSOLE CLEANUP (Mobile पर भी काम करेगा)
+            // ============================================================
+            setInterval(function() {
+                console.clear();
+            }, 100);
+
+            // Console methods को silent करें
+            const noop = function() {};
+            console.log = noop;
+            console.warn = noop;
+            console.error = noop;
+            console.info = noop;
+            console.debug = noop;
+            console.table = noop;
+            console.dir = noop;
+
+            // Network tab clear
+            setInterval(function() {
+                try {
+                    if (window.performance && performance.clearResourceTimings) {
+                        performance.clearResourceTimings();
+                    }
+                } catch(e) { /* ignore */ }
+            }, 3000);
+
+            console.log('✅ Anti-DevTools: Mobile Friendly Mode ACTIVE');
+            console.log('🟢 RIGHT CLICK: ALLOWED');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+            console.log('📱 Mobile users: SAFE, no redirects');
+        })();
+
+        /**
+         * ================================================================
          *  🎬 ADMIN PANEL - Full Control with DB Sync
          *  - Password protected login
          *  - Set Class Name & Stream URL (saved to Cloudflare D1)
          *  - Refresh Users button (forces all users to reload)
          *  - 10 keys with regenerate button
+         *  - Sync Keys to Database (so new users can use them)
          *  - One-time use key system (FIXED)
          * ================================================================
          */
@@ -636,7 +771,7 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        const ADMIN_PASSWORD = "admin123";
+        const ADMIN_PASSWORD = "@rohit83077";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
 
         // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
@@ -663,6 +798,7 @@
         const connDot = document.getElementById('connDot');
         const connText = document.getElementById('connText');
         const adminKeyGrid = document.getElementById('adminKeyGrid');
+        const keySyncStatus = document.getElementById('keySyncStatus');
 
         const classNameInput = document.getElementById('classNameInput');
         const streamUrlInput = document.getElementById('streamUrlInput');
@@ -689,7 +825,50 @@
             localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
             localStorage.setItem('usedKeys', JSON.stringify([]));
             renderAdminKeys();
-            showAdminMessage('✅ 10 new keys generated!', 'success');
+            showAdminMessage('✅ 10 new keys generated! Syncing to database...', 'success');
+            keySyncStatus.textContent = '⏳ Syncing to database...';
+            keySyncStatus.style.color = '#f7971e';
+            
+            // 🆕 AUTO-SYNC: Database में तुरंत सेव करें
+            syncKeysToDB();
+        }
+
+        // ============================================================
+        // 💾 SYNC KEYS TO DATABASE
+        // ============================================================
+
+        async function syncKeysToDB() {
+            showAdminMessage('⏳ Syncing keys to database...', 'info');
+
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keys: VALID_KEYS })
+                });
+
+                if (!response.ok) throw new Error('Failed to sync keys');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage('✅ Keys synced to database successfully!', 'success');
+                    keySyncStatus.textContent = '✅ Keys are synced with database';
+                    keySyncStatus.style.color = '#00ff88';
+                    // Update used keys in DB as well
+                    const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
+                    await fetch(`${WORKER_URL}/sync-used-keys`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usedKeys: usedKeys })
+                    });
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Sync error:', error);
+                showAdminMessage(`❌ Failed to sync keys: ${error.message}`, 'error');
+            }
         }
 
         // ============================================================
@@ -707,6 +886,8 @@
                 renderAdminKeys();
                 fetchStatus();
                 setInterval(fetchStatus, 3000);
+                // Check key sync status
+                checkKeySyncStatus();
             } else {
                 loginError.textContent = '❌ Invalid password!';
                 passwordInput.value = '';
@@ -778,7 +959,29 @@
         }
 
         // ============================================================
-        // 🎬 APPLY STREAM CONFIG (Save to DB via Worker)
+        // 🔄 CHECK KEY SYNC STATUS
+        // ============================================================
+
+        async function checkKeySyncStatus() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-keys`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.keys && JSON.stringify(data.keys) === JSON.stringify(VALID_KEYS)) {
+                    keySyncStatus.textContent = '✅ Keys are synced with database';
+                    keySyncStatus.style.color = '#00ff88';
+                } else {
+                    keySyncStatus.textContent = '⚠️ Keys not synced with database! Click "Sync Keys to DB"';
+                    keySyncStatus.style.color = '#f7971e';
+                }
+            } catch (error) {
+                console.error('❌ Key sync check error:', error);
+            }
+        }
+
+        // ============================================================
+        // 🎬 APPLY STREAM CONFIG
         // ============================================================
 
         async function applyStreamConfig() {
@@ -793,7 +996,6 @@
             showAdminMessage('⏳ Saving config to database...', 'info');
 
             try {
-                // Save config to Cloudflare D1 via Worker
                 const response = await fetch(`${WORKER_URL}/update-config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -809,7 +1011,6 @@
 
                 if (data.success) {
                     showAdminMessage(`✅ Config saved to database! Class: ${className}`, 'success');
-                    // Also save locally for immediate use
                     localStorage.setItem('adminClassName', className);
                     localStorage.setItem('adminStreamUrl', streamUrl);
                 } else {
@@ -817,7 +1018,6 @@
                 }
             } catch (error) {
                 console.error('❌ Config save error:', error);
-                // Fallback: save locally only
                 localStorage.setItem('adminClassName', className);
                 localStorage.setItem('adminStreamUrl', streamUrl);
                 showAdminMessage(`⚠️ Saved locally only (DB error: ${error.message})`, 'error');
@@ -825,14 +1025,13 @@
         }
 
         // ============================================================
-        // 🔄 REFRESH ALL USERS (Force reload via DB flag)
+        // 🔄 REFRESH ALL USERS
         // ============================================================
 
         async function refreshAllUsers() {
             showAdminMessage('⏳ Sending refresh signal to all users...', 'info');
 
             try {
-                // Set refresh flag in DB
                 const response = await fetch(`${WORKER_URL}/set-refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -845,7 +1044,6 @@
 
                 if (data.success) {
                     showAdminMessage('✅ Refresh signal sent! All users will reload.', 'success');
-                    // Clear refresh flag after 2 seconds
                     setTimeout(async () => {
                         await fetch(`${WORKER_URL}/set-refresh`, {
                             method: 'POST',
@@ -1018,6 +1216,10 @@
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
         console.log('📡 API:', WORKER_URL);
+        console.log('🛡️ Anti-Developer Tools: ACTIVE (Mobile Friendly)');
+        console.log('🟢 RIGHT CLICK: ALLOWED');
+        console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED (Desktop only)');
+        console.log('📱 Mobile users: SAFE, no redirects');
     </script>
 
 </body>
