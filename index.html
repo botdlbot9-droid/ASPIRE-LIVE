@@ -467,7 +467,7 @@
         }
 
         /* ================================================================
-           🔥 PAUSE OVERLAY - Dark (No Icon, Sirf Text)
+           🔥 PAUSE OVERLAY - Dark 
            ================================================================ */
         #pauseOverlay {
             position: fixed;
@@ -624,63 +624,6 @@
             color: #f7971e;
         }
 
-        /* ===== KEY LIST (Verification Page) ===== */
-        .key-list-container {
-            margin-top: 25px;
-            padding: 20px;
-            background: #12121e;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-        }
-
-        .key-list-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #a0a0b8;
-            margin-bottom: 15px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .key-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .key-item {
-            background: #0f0f23;
-            border: 1px solid #2a2a4e;
-            border-radius: 8px;
-            padding: 10px 8px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #f7971e;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .key-item:hover {
-            background: #1a1a3e;
-            border-color: #f7971e;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
-        }
-
-        .key-item:active {
-            transform: scale(0.95);
-        }
-
-        .key-item.copied {
-            background: #00ff88;
-            color: #0a0a12;
-            border-color: #00ff88;
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .container { padding: 16px; }
@@ -695,8 +638,6 @@
             #blankOverlay .blank-title { font-size: 24px; }
             .contact-admin { flex-direction: column; align-items: center; }
             .contact-btn { width: 100%; justify-content: center; }
-            .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-            .key-item { font-size: 14px; padding: 8px 6px; }
         }
     </style>
 </head>
@@ -735,11 +676,6 @@
             </form>
 
             <div id="verifyMessage" class="verify-error"></div>
-
-            <div class="key-list-container">
-                <div class="key-list-title">📋 Click any key to copy</div>
-                <div class="key-grid" id="keyGrid"></div>
-            </div>
 
             <!-- 🔥 CONTACT ADMIN BUTTONS - On Verification Page -->
             <div class="contact-admin">
@@ -984,6 +920,7 @@
          *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
          *  - Contact Admin buttons on both pages
+         *  - 🔒 KEYS ARE NOT DISPLAYED ON WEBSITE (Security)
          * ================================================================
          */
 
@@ -1051,53 +988,6 @@
                 console.error('❌ Failed to load keys from DB:', error);
                 return false;
             }
-        }
-
-        // ============================================================
-        // 🔑 RENDER KEYS (50 KEYS)
-        // ============================================================
-        function renderKeys() {
-            const keyGrid = document.getElementById('keyGrid');
-            keyGrid.innerHTML = '';
-            VALID_KEYS.forEach(key => {
-                const el = document.createElement('div');
-                el.className = 'key-item';
-                el.textContent = key;
-                el.title = 'Click to copy';
-                el.addEventListener('click', function() {
-                    copyKey(key, el);
-                });
-                keyGrid.appendChild(el);
-            });
-        }
-
-        function copyKey(key, element) {
-            navigator.clipboard.writeText(key).then(() => {
-                element.classList.add('copied');
-                setTimeout(() => { element.classList.remove('copied'); }, 800);
-                showToast(`✅ Copied: ${key}`);
-            }).catch(() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = key;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                element.classList.add('copied');
-                setTimeout(() => { element.classList.remove('copied'); }, 800);
-                showToast(`✅ Copied: ${key}`);
-            });
-        }
-
-        let toastTimer = null;
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
         }
 
         // ============================================================
@@ -1542,9 +1432,6 @@
             // Load config from DB
             await loadAdminConfig();
 
-            // Render keys on verification page
-            renderKeys();
-
             // Start remote polling
             setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
 
@@ -1591,6 +1478,7 @@
             console.log('🟢 RIGHT CLICK: ALLOWED');
             console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
             console.log('📱 Mobile users: SAFE, no redirects');
+            console.log('🔒 Keys are NOT displayed on website (Security)');
         });
 
         // ============================================================
