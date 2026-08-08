@@ -767,9 +767,10 @@
          *  - Password protected login
          *  - Set Class Name & Stream URL (saved to Cloudflare D1)
          *  - Refresh Users button (forces all users to reload)
-         *  - 10 keys with regenerate button
+         *  - 50 keys with regenerate button
          *  - Sync Keys to Database (so new users can use them)
          *  - One-time use key system (FIXED)
+         *  - INSTANT BUTTON RESPONSE (0.1s)
          * ================================================================
          */
 
@@ -780,10 +781,18 @@
         const ADMIN_PASSWORD = "@rohit83077";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
 
-        // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
+        // ⭐⭐⭐ 50 KEYS (Default) ⭐⭐⭐
         let VALID_KEYS = [
             'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
-            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
+            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
+            'A1B2C3D4', 'F5G6H7I8', 'J9K0L1M2', 'N3O4P5Q6', 'R7S8T9U0',
+            'V1W2X3Y4', 'Z5A6B7C8', 'D9E0F1G2', 'H3I4J5K6', 'L7M8N9O0',
+            'P1Q2R3S4', 'T5U6V7W8', 'X9Y0Z1A2', 'B3C4D5E6', 'F7G8H9I0',
+            'J1K2L3M4', 'N5O6P7Q8', 'R9S0T1U2', 'V3W4X5Y6', 'Z7A8B9C0',
+            'D1E2F3G4', 'H5I6J7K8', 'L9M0N1O2', 'P3Q4R5S6', 'T7U8V9W0',
+            'X1Y2Z3A4', 'B5C6D7E8', 'F9G0H1I2', 'J3K4L5M6', 'N7O8P9Q0',
+            'R1S2T3U4', 'V5W6X7Y8', 'Z9A0B1C2', 'D3E4F5G6', 'H7I8J9K0',
+            'L1M2N3O4', 'P5Q6R7S8', 'T9U0V1W2', 'X3Y4Z5A6', 'B7C8D9E0'
         ];
 
         // ============================================================
@@ -824,14 +833,14 @@
 
         function regenerateKeys() {
             const newKeys = [];
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 50; i++) {
                 newKeys.push(generateRandomKey());
             }
             VALID_KEYS = newKeys;
             localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
             localStorage.setItem('usedKeys', JSON.stringify([]));
             renderAdminKeys();
-            showAdminMessage('✅ 10 new keys generated! Syncing to database...', 'success');
+            showAdminMessage('✅ 50 new keys generated! Syncing to database...', 'success');
             keySyncStatus.textContent = '⏳ Syncing to database...';
             keySyncStatus.style.color = '#f7971e';
             
@@ -914,7 +923,7 @@
             if (savedKeys) {
                 try {
                     const parsed = JSON.parse(savedKeys);
-                    if (Array.isArray(parsed) && parsed.length === 10) {
+                    if (Array.isArray(parsed) && parsed.length === 50) {
                         VALID_KEYS = parsed;
                     }
                 } catch (e) { /* ignore */ }
@@ -1128,14 +1137,38 @@
         }
 
         // ============================================================
-        // ✏️ UPDATE STATUS
+        // ✏️ UPDATE STATUS - INSTANT (0.1s)
         // ============================================================
 
         async function updateStatus(newStatus, actionName) {
             const btn = document.querySelector(`.btn-${actionName === 'pause' ? 'pause' : actionName === 'resume' ? 'resume' : actionName === 'blank' ? 'blank' : 'remove-blank'}`);
             if (btn) {
                 btn.disabled = true;
-                btn.textContent = '⏳ Processing...';
+                btn.textContent = '⏳...';
+            }
+
+            // ✅ INSTANT UI UPDATE - Pehle change dikhao
+            if (newStatus === 'playing') {
+                statusText.textContent = '▶️ Playing';
+                statusText.className = 'value online';
+                pauseBtn.disabled = false;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = false;
+                removeBlankBtn.disabled = true;
+            } else if (newStatus === 'paused') {
+                statusText.textContent = '⏸️ Paused';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = false;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = true;
+            } else if (newStatus === 'blank') {
+                statusText.textContent = '📺 Blank Page';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = false;
             }
 
             showAdminMessage(`⏳ ${actionName}ing...`, 'info');
@@ -1152,20 +1185,23 @@
 
                 if (data.success) {
                     showAdminMessage(`✅ Video ${actionName}d!`, 'success');
-                    setTimeout(fetchStatus, 500);
                 } else {
                     throw new Error('API returned error');
                 }
             } catch (error) {
                 console.error('❌ Update error:', error);
                 showAdminMessage(`❌ Failed to ${actionName}`, 'error');
-                if (btn) {
+                setTimeout(fetchStatus, 500);
+            }
+
+            if (btn) {
+                setTimeout(() => {
                     btn.disabled = false;
                     btn.textContent = actionName === 'pause' ? '⏸️ Pause' :
                                      actionName === 'resume' ? '▶️ Play' :
                                      actionName === 'blank' ? '📺 Blank' :
                                      '🖼️ Remove';
-                }
+                }, 300);
             }
         }
 
@@ -1226,6 +1262,8 @@
         console.log('🟢 RIGHT CLICK: ALLOWED');
         console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
         console.log('📱 Mobile users: SAFE, no redirects');
+        console.log('⚡ Button Response: INSTANT (0.1s)');
+        console.log('🔑 Total Keys: 50');
     </script>
 
 </body>
