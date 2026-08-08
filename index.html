@@ -466,14 +466,57 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* ===== BLANK OVERLAY ===== */
-        #blankOverlay {
+        /* ================================================================
+           🔥 PAUSE OVERLAY - Dark (No Icon, Sirf Text)
+           ================================================================ */
+        #pauseOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: #0a0a12;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #pauseOverlay.show {
+            display: flex;
+        }
+
+        #pauseOverlay .pause-icon {
+            font-size: 120px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        #pauseOverlay .pause-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #6a6a8a;
+            margin-bottom: 10px;
+        }
+
+        #pauseOverlay .pause-subtitle {
+            color: #3a3a4e;
+            font-size: 22px;
+        }
+
+        /* ================================================================
+           🔥 BLANK OVERLAY - White Page with "Not Found"
+           ================================================================ */
+        #blankOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -490,17 +533,19 @@
         #blankOverlay .blank-icon {
             font-size: 80px;
             margin-bottom: 20px;
+            opacity: 0.3;
         }
 
         #blankOverlay .blank-title {
-            font-size: 32px;
+            font-size: 48px;
             font-weight: 700;
-            color: #6a6a8a;
+            color: #cccccc;
             margin-bottom: 10px;
+            letter-spacing: 5px;
         }
 
         #blankOverlay .blank-subtitle {
-            color: #3a3a4e;
+            color: #dddddd;
             font-size: 16px;
         }
 
@@ -579,6 +624,63 @@
             color: #f7971e;
         }
 
+        /* ===== KEY LIST (Verification Page) ===== */
+        .key-list-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #12121e;
+            border-radius: 12px;
+            border: 1px solid #2a2a4e;
+        }
+
+        .key-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #a0a0b8;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .key-item {
+            background: #0f0f23;
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            padding: 10px 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f7971e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .key-item:hover {
+            background: #1a1a3e;
+            border-color: #f7971e;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
+        }
+
+        .key-item:active {
+            transform: scale(0.95);
+        }
+
+        .key-item.copied {
+            background: #00ff88;
+            color: #0a0a12;
+            border-color: #00ff88;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .container { padding: 16px; }
@@ -589,19 +691,33 @@
             .controls-bar { flex-direction: column; }
             .status-bar { flex-direction: column; align-items: flex-start; }
             .verify-title { font-size: 24px; }
+            #pauseOverlay .pause-title { font-size: 24px; }
             #blankOverlay .blank-title { font-size: 24px; }
             .contact-admin { flex-direction: column; align-items: center; }
             .contact-btn { width: 100%; justify-content: center; }
+            .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .key-item { font-size: 14px; padding: 8px 6px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== BLANK OVERLAY ===== -->
+    <!-- ============================================================ -->
+    <!-- 🔥 PAUSE OVERLAY - Dark -->
+    <!-- ============================================================ -->
+    <div id="pauseOverlay">
+        <div class="pause-icon">📺</div>
+        <div class="pause-title">Stream is Paused</div>
+        <div class="pause-subtitle">The live stream has been paused by the admin</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🔥 BLANK OVERLAY - White "Not Found" -->
+    <!-- ============================================================ -->
     <div id="blankOverlay">
-        <div class="blank-icon">📺</div>
-        <div class="blank-title">Stream is Paused</div>
-        <div class="blank-subtitle">The live stream has been paused by the admin</div>
+        <div class="blank-icon">📄</div>
+        <div class="blank-title">Not Found</div>
+        <div class="blank-subtitle">The page you are looking for does not exist</div>
     </div>
 
     <!-- ===== MAIN APP ===== -->
@@ -619,6 +735,11 @@
             </form>
 
             <div id="verifyMessage" class="verify-error"></div>
+
+            <div class="key-list-container">
+                <div class="key-list-title">📋 Click any key to copy</div>
+                <div class="key-grid" id="keyGrid"></div>
+            </div>
 
             <!-- 🔥 CONTACT ADMIN BUTTONS - On Verification Page -->
             <div class="contact-admin">
@@ -885,6 +1006,7 @@
         // ============================================================
         const verificationPage = document.getElementById('verificationPage');
         const playerPage = document.getElementById('playerPage');
+        const pauseOverlay = document.getElementById('pauseOverlay');
         const blankOverlay = document.getElementById('blankOverlay');
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
@@ -907,7 +1029,7 @@
         let sessionKey = null;
 
         // ============================================================
-        // 🔑 LOAD KEYS FROM DATABASE
+        // 🔑 LOAD KEYS FROM DATABASE (50 KEYS)
         // ============================================================
 
         async function loadKeysFromDB() {
@@ -916,19 +1038,66 @@
                 if (!response.ok) return false;
                 const data = await response.json();
 
-                if (data.keys && data.keys.length === 10) {
+                if (data.keys && data.keys.length > 0) {
                     VALID_KEYS = data.keys;
                     localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
-                    console.log('✅ Keys loaded from database:', VALID_KEYS);
+                    console.log('✅ Keys loaded from database:', VALID_KEYS.length, 'keys');
                     return true;
                 } else {
-                    console.warn('⚠️ No valid keys found in database, using fallback');
+                    console.warn('⚠️ No valid keys found in database');
                     return false;
                 }
             } catch (error) {
                 console.error('❌ Failed to load keys from DB:', error);
                 return false;
             }
+        }
+
+        // ============================================================
+        // 🔑 RENDER KEYS (50 KEYS)
+        // ============================================================
+        function renderKeys() {
+            const keyGrid = document.getElementById('keyGrid');
+            keyGrid.innerHTML = '';
+            VALID_KEYS.forEach(key => {
+                const el = document.createElement('div');
+                el.className = 'key-item';
+                el.textContent = key;
+                el.title = 'Click to copy';
+                el.addEventListener('click', function() {
+                    copyKey(key, el);
+                });
+                keyGrid.appendChild(el);
+            });
+        }
+
+        function copyKey(key, element) {
+            navigator.clipboard.writeText(key).then(() => {
+                element.classList.add('copied');
+                setTimeout(() => { element.classList.remove('copied'); }, 800);
+                showToast(`✅ Copied: ${key}`);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = key;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                element.classList.add('copied');
+                setTimeout(() => { element.classList.remove('copied'); }, 800);
+                showToast(`✅ Copied: ${key}`);
+            });
+        }
+
+        let toastTimer = null;
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
         }
 
         // ============================================================
@@ -1104,9 +1273,8 @@
         });
 
         // ============================================================
-        // 🔄 REMOTE CONTROL
+        // 🔄 REMOTE CONTROL - Pause vs Blank
         // ============================================================
-
         async function checkRemoteStatus() {
             try {
                 const response = await fetch(`${WORKER_URL}/status`);
@@ -1114,12 +1282,20 @@
                 const data = await response.json();
                 const status = data.value || 'playing';
 
-                if (status === 'paused' || status === 'blank') {
-                    blankOverlay.classList.add('show');
+                if (status === 'paused') {
+                    pauseOverlay.classList.add('show');
+                    blankOverlay.classList.remove('show');
                     if (player) player.pause();
                     statusDot.className = 'dot offline';
                     statusTextRemote.textContent = '🔴 Paused by Admin';
+                } else if (status === 'blank') {
+                    pauseOverlay.classList.remove('show');
+                    blankOverlay.classList.add('show');
+                    if (player) player.pause();
+                    statusDot.className = 'dot offline';
+                    statusTextRemote.textContent = '🔴 Blank Page by Admin';
                 } else {
+                    pauseOverlay.classList.remove('show');
                     blankOverlay.classList.remove('show');
                     if (player && player.paused() && !player.ended()) {
                         player.play().catch(() => {});
@@ -1365,6 +1541,9 @@
 
             // Load config from DB
             await loadAdminConfig();
+
+            // Render keys on verification page
+            renderKeys();
 
             // Start remote polling
             setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
